@@ -1,3 +1,9 @@
+# Project specifics
+elevator
+
+# VS code
+.vscode/
+
 # Prerequisites
 *.d
 

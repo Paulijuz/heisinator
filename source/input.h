@@ -9,6 +9,8 @@
 //   linked_list *active_inputs;
 // }
 
+extern int last_floor;
+
 // Linked list for inputs
 typedef struct input_linked_list_s {
   int floor;
@@ -33,6 +35,6 @@ void inputs_read(void);
 // 
 
 void input_push(int floor, ButtonType button);
-void input_pop(input_linked_list_t* input_node);
+bool input_pop(input_linked_list_t* input_node);
 bool input_exists(int floor, int button_type);
 void inputs_print(void);

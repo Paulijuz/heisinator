@@ -43,6 +43,8 @@
 //     return 0;
 // }
 
+input_linked_list_t current_input;
+
 int main() {
   elevio_init();
 
@@ -56,8 +58,32 @@ int main() {
   printf("=== Button Test Program ===\n");
   printf("Press the stop button on the elevator panel to exit\n");  
 
+  // Startup
+  elevio_motorDirection(DIRN_DOWN);
+  while(last_floor == -1) inputs_read();
+  elevio_motorDirection(DIRN_STOP);
+
+  bool moving = false;
+
   while (true) {
     inputs_read();
+
+    if(!moving && input_pop(&current_input)) {
+      int dir = current_input.floor - last_floor;
+      
+      if(dir > 0) {
+        elevio_motorDirection(DIRN_UP);
+      } else if(dir < 0) {
+        elevio_motorDirection(DIRN_DOWN);
+      }
+
+      moving = true;
+    }
+
+    if(moving && last_floor == current_input.floor) {
+      moving = false;
+      elevio_motorDirection(DIRN_STOP);
+    }
 
     if(elevio_stopButton()) {
       input_pop(NULL);
