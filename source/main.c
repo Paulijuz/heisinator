@@ -60,7 +60,7 @@ int main() {
     read_inputs();
 
     if(elevio_stopButton()) {
-      pop_input(NULL);
+      input_pop(NULL);
     }
   }
 }

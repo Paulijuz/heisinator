@@ -28,11 +28,11 @@ typedef struct readonly_elevator_state_s {
 } readonly_elevator_state_t;
 
 // Need read-functions (not write)
-void read_inputs(void);
+void inputs_read(void);
 
 // 
 
-void push_input(int floor, ButtonType button);
-void pop_input(input_linked_list_t* input_node);
-bool exists_in_input(int floor, int button_type);
-void print_linked_list(void);
+void input_push(int floor, ButtonType button);
+void input_pop(input_linked_list_t* input_node);
+bool input_exists(int floor, int button_type);
+void inputs_print(void);

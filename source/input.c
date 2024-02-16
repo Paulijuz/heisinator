@@ -5,25 +5,25 @@ static readonly_elevator_state_t* elevator_state;
 static input_linked_list_t* input_linked_list_head = NULL;
 static input_linked_list_t* input_linked_list_tail = NULL;
 
-void read_inputs() {
+void inputs_read() {
   for(int f = 0; f < N_FLOORS; f++){
     for(int b = 0; b < N_BUTTONS; b++){
       int btnPressed = elevio_callButton(f, b);
 
       // Check if element already exists in linked list
-      if (!exists_in_input(f, b) && btnPressed) {
-        push_input(f, b);
+      if (!input_exists(f, b) && btnPressed) {
+        input_push(f, b);
       }
     }
   }
-
-  // Print linked list
-  // print_linked_list();
 }
 
-void print_linked_list(void) {
+void inputs_print(void) {
   // Print
   input_linked_list_t* input_node = input_linked_list_head;
+
+  printf("\nCurrent inputs:\n");
+
   if (input_node == NULL) {
     printf("[List is empty]\n");
     return;
@@ -33,10 +33,9 @@ void print_linked_list(void) {
     printf("Floor: %d, Button: %d\n", input_node->floor, input_node->button);
     input_node = input_node->next;
   }
-  printf("\n");
 }
 
-void push_input(int floor, ButtonType button) {
+void input_push(int floor, ButtonType button) {
   // Allocate memory for new input
   input_linked_list_t* new_input = malloc(sizeof(input_linked_list_t));
   elevio_buttonLamp(floor, button, 1);
@@ -53,10 +52,10 @@ void push_input(int floor, ButtonType button) {
   input_linked_list_tail = new_input;
 
   // Print linked list
-  print_linked_list();
+  inputs_print();
 }
 
-void pop_input(input_linked_list_t* input_node) {
+void input_pop(input_linked_list_t* input_node) {
   if (input_linked_list_head == NULL) return;
   elevio_buttonLamp(input_linked_list_head->floor, input_linked_list_head->button, 0);
   
@@ -72,10 +71,10 @@ void pop_input(input_linked_list_t* input_node) {
   free(temp);
 
   // Print linked list
-  print_linked_list();
+  inputs_print();
 }
 
-bool exists_in_input(int floor, int button_type) {
+bool input_exists(int floor, int button_type) {
   // Start at beginning of linked list
   input_linked_list_t *input_node = input_linked_list_head;
   
