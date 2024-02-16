@@ -35,3 +35,4 @@ void read_inputs(void);
 void push_input(int floor, ButtonType button);
 void pop_input(input_linked_list_t* input_node);
 bool exists_in_input(int floor, int button_type);
+void print_linked_list(void);

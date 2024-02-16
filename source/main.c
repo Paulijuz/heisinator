@@ -51,5 +51,10 @@ int main() {
 
   while (true) {
     read_inputs();
+
+    if(elevio_stopButton()) {
+      pop_input(NULL);
+      break;
+    }
   }
 }
