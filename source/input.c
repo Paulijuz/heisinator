@@ -18,7 +18,7 @@ void read_inputs() {
   }
 
   // Print linked list
-  print_linked_list();
+  // print_linked_list();
 }
 
 void print_linked_list(void) {
@@ -55,7 +55,7 @@ void push_input(int floor, ButtonType button) {
 
 void pop_input(input_linked_list_t* input_node) {
   if (input_linked_list_head == NULL) return;
-  elevio_buttonLamp(input_linked_list_head->floor, input_linked_list_head->button, 1);
+  elevio_buttonLamp(input_linked_list_head->floor, input_linked_list_head->button, 0);
   
   // Set input_node to the head of the linked list
   if (input_node != NULL) *input_node = *input_linked_list_head;
