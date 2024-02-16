@@ -46,6 +46,13 @@
 int main() {
   elevio_init();
 
+  // Set light off for all buttons
+  for(int f = 0; f < N_FLOORS; f++){
+    for(int b = 0; b < N_BUTTONS; b++){
+      elevio_buttonLamp(f, b, 0);
+    }
+  }
+
   printf("=== Button Test Program ===\n");
   printf("Press the stop button on the elevator panel to exit\n");  
 
@@ -54,7 +61,6 @@ int main() {
 
     if(elevio_stopButton()) {
       pop_input(NULL);
-      break;
     }
   }
 }
