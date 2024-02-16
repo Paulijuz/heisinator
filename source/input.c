@@ -59,10 +59,13 @@ void pop_input(input_linked_list_t* input_node) {
   
   // Set input_node to the head of the linked list
   if (input_node != NULL) *input_node = *input_linked_list_head;
+  input_linked_list_t* temp = input_linked_list_head;
+
+  // Update tail of linked list
+  if (input_linked_list_head == input_linked_list_tail) input_linked_list_tail = NULL;
+  input_linked_list_head = input_linked_list_head->next;
 
   // Delete the head of the linked list node and update the head
-  input_linked_list_t* temp = input_linked_list_head;
-  input_linked_list_head = input_linked_list_head->next;
   free(temp);
 
   // Print linked list
