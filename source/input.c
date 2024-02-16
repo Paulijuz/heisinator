@@ -1,6 +1,3 @@
-#include <stdbool.h>
-#include <stdio.h>
-#include "driver/elevio.h"
 #include "input.h"
 
 static readonly_elevator_state_t* elevator_state;
@@ -48,7 +45,7 @@ void push_input(int floor, ButtonType button) {
 }
 
 void pop_input(input_linked_list_t* input_node) {
-  if (input_linked_list_head == NULL) return NULL;
+  if (input_linked_list_head == NULL);
   
   // Set input_node to the head of the linked list
   *input_node = *input_linked_list_head;

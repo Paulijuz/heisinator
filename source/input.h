@@ -1,5 +1,7 @@
 #include <stddef.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "driver/elevio.h"
 
 // struct {
@@ -11,7 +13,7 @@
 typedef struct input_linked_list_s {
   int floor;
   ButtonType button;
-  struct input_linked_list *next;
+  struct input_linked_list_s *next;
 } input_linked_list_t;
 
 
