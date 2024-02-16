@@ -9,7 +9,6 @@ void read_inputs() {
   for(int f = 0; f < N_FLOORS; f++){
     for(int b = 0; b < N_BUTTONS; b++){
       int btnPressed = elevio_callButton(f, b);
-      printf("Button pressed: %d\n", btnPressed);
       elevio_buttonLamp(f, b, btnPressed);
 
       // Check if element already exists in linked list
@@ -42,6 +41,7 @@ void push_input(int floor, ButtonType button) {
   if (input_linked_list_head == NULL) input_linked_list_head = new_input;
   if (input_linked_list_tail == NULL) input_linked_list_tail = new_input;
   else input_linked_list_tail->next = new_input;
+  input_linked_list_tail = new_input;
 }
 
 void pop_input(input_linked_list_t* input_node) {
