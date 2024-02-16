@@ -5,6 +5,8 @@ static readonly_elevator_state_t* elevator_state;
 static input_linked_list_t* input_linked_list_head = NULL;
 static input_linked_list_t* input_linked_list_tail = NULL;
 
+int last_floor = -1;
+
 void inputs_read() {
   for(int f = 0; f < N_FLOORS; f++){
     for(int b = 0; b < N_BUTTONS; b++){
@@ -16,6 +18,10 @@ void inputs_read() {
       }
     }
   }
+
+  int floor = elevio_floorSensor();
+
+  if (floor != -1) last_floor = floor;
 }
 
 void inputs_print(void) {
@@ -55,8 +61,8 @@ void input_push(int floor, ButtonType button) {
   inputs_print();
 }
 
-void input_pop(input_linked_list_t* input_node) {
-  if (input_linked_list_head == NULL) return;
+bool input_pop(input_linked_list_t* input_node) {
+  if (input_linked_list_head == NULL) return false;
   elevio_buttonLamp(input_linked_list_head->floor, input_linked_list_head->button, 0);
   
   // Set input_node to the head of the linked list
@@ -72,6 +78,8 @@ void input_pop(input_linked_list_t* input_node) {
 
   // Print linked list
   inputs_print();
+
+  return true;
 }
 
 bool input_exists(int floor, int button_type) {
