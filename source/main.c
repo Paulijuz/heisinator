@@ -57,7 +57,7 @@ int main() {
   printf("Press the stop button on the elevator panel to exit\n");  
 
   while (true) {
-    read_inputs();
+    inputs_read();
 
     if(elevio_stopButton()) {
       input_pop(NULL);
