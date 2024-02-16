@@ -1,5 +1,6 @@
 #include <stdbool.h>
-#include <driver/elevio.h>
+#include <stdio.h>
+#include "driver/elevio.h"
 #include "input.h"
 
 static readonly_elevator_state_t* elevator_state;
