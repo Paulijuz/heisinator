@@ -24,8 +24,11 @@ void read_inputs() {
 void print_linked_list(void) {
   // Print
   input_linked_list_t* input_node = input_linked_list_head;
-  if (input_node == NULL) return;
-  
+  if (input_node == NULL) {
+    printf("[List is empty]\n");
+    return;
+  }
+
   while (input_node != NULL) {
     printf("Floor: %d, Button: %d\n", input_node->floor, input_node->button);
     input_node = input_node->next;
