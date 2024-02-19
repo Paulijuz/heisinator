@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "driver/elevio.h"
+#include "logger.h"
 
 // struct {
 //   // Active inputs

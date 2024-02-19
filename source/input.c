@@ -28,15 +28,15 @@ void inputs_print(void) {
   // Print
   input_linked_list_t* input_node = input_linked_list_head;
 
-  printf("\nCurrent inputs:\n");
+  log_debug("Current inputs:");
 
   if (input_node == NULL) {
-    printf("[List is empty]\n");
+    log_debug("[List is empty]");
     return;
   }
 
   while (input_node != NULL) {
-    printf("Floor: %d, Button: %d\n", input_node->floor, input_node->button);
+    log_debug("Floor: %d, Button: %d", input_node->floor, input_node->button);
     input_node = input_node->next;
   }
 }

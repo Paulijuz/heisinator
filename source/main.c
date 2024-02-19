@@ -5,6 +5,7 @@
 #include <math.h>
 #include "driver/elevio.h"
 
+#include "logger.h"
 #include "input.h"
 
 
@@ -56,9 +57,6 @@ int main() {
     }
   }
 
-  printf("=== Button Test Program ===\n");
-  printf("Press the stop button on the elevator panel to exit\n");  
-
   // Startup
   elevio_motorDirection(DIRN_DOWN);
   while(last_floor == -1) inputs_read();
@@ -80,14 +78,15 @@ int main() {
     //   }
 
       moving = true;
-      printf("Moving %s from floor %d to floor %d\n", dir > 0 ? "up" : "down", last_floor, current_input.floor);
+      log_info("Moving %s from floor %d to floor %d", dir > 0 ? "up" : "down", last_floor, current_input.floor);
     }
 
     if(moving && last_floor == current_input.floor) {
       moving = false;
 
-      printf("Arrived at floor %d\n", last_floor);
-
+      log_info("Arrived at floor %d", last_floor);
+      log_warning("OH NO!");
+      log_error("wow");
       elevio_motorDirection(DIRN_STOP);
       struct timespec ts;
       ts.tv_sec = 3;
@@ -98,8 +97,9 @@ int main() {
       current_input.floor = -1;
       current_input.button = -1;
     }
-
+    
     if(elevio_stopButton()) {
+      log_fatal("DELETE!");
       input_pop(NULL);
     }
   }
