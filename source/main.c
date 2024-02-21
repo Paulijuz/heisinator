@@ -6,7 +6,8 @@
 #include "driver/elevio.h"
 
 #include "input.h"
-
+#include "queue.h"
+#include "time.h"
 
 // int main(){
 //     elevio_init();
@@ -44,9 +45,15 @@
 //     return 0;
 // }
 
-input_linked_list_t current_input;
+input_element_t current_input;
+
+bool waiting = false;
+time_t waiting_until;
+
+bool moving = false;
 
 int main() {
+  // Initialize elevator
   elevio_init();
 
   // Set light off for all buttons
@@ -57,47 +64,62 @@ int main() {
   }
 
   printf("=== Button Test Program ===\n");
-  printf("Press the stop button on the elevator panel to exit\n");  
+  // printf("Press the stop button on the elevator panel to exit\n");  
 
   // Startup
   elevio_motorDirection(DIRN_DOWN);
   while(last_floor == -1) inputs_read();
   elevio_motorDirection(DIRN_STOP);
 
-  bool moving = false;
-
   while (true) {
+    // Read inputs
     inputs_read();
 
-    if(!moving && input_pop(&current_input)) {
-      int dir = current_input.floor - last_floor;
-      elevio_motorDirection(dir != 0 ? abs(dir) / dir : 0);
-      
-    //   if(dir > 0) {
-    //     elevio_motorDirection(DIRN_UP);
-    //   } else if(dir < 0) {
-    //     elevio_motorDirection(DIRN_DOWN);
+    // Parse inputs
+    while (input_length() > 0) {
+      parse_input(last_floor);
+    }
+
+    // Check if we are waiting
+    // if (waiting) {
+    //   if (time(NULL) > waiting_until) {
+    //     waiting = false;
+    //     printf("\r\033[2KDone waiting\n");
+    //   } else {
+    //     double remaining_time = waiting_until - time(NULL); // Add one to round up
+    //     printf("\rWaiting for %.2f seconds", remaining_time);
+    //     fflush(stdout);
+    //     continue;
+    //     // nanosleep(&(struct timespec){0, 500*1000*1000}, NULL);
     //   }
+    // }
 
-      moving = true;
-      printf("Moving %s from floor %d to floor %d\n", dir > 0 ? "up" : "down", last_floor, current_input.floor);
-    }
+    // if(!moving && input_pop(&current_input)) {
+    //   // Get input direction with some funky maths (equivalent to sign(dir))
+    //   int dir = current_input.floor - last_floor;
+    //   elevio_motorDirection(dir != 0 ? abs(dir) / dir : 0);
 
-    if(moving && last_floor == current_input.floor) {
-      moving = false;
+    //   // Start moving
+    //   moving = true;
+    //   printf("\nMoving from floor %d to floor %d\n", last_floor, current_input.floor);
+    // }
 
-      printf("Arrived at floor %d\n", last_floor);
+    // if(moving && last_floor == current_input.floor) {
+    //   moving = false;
+    //   printf("\nArrived at floor %d\n", last_floor);
 
-      elevio_motorDirection(DIRN_STOP);
-      struct timespec ts;
-      ts.tv_sec = 3;
-      ts.tv_nsec = 0;
+    //   elevio_motorDirection(DIRN_STOP);
 
-      nanosleep(&ts, NULL);
+    //   // Start waiting
+    //   waiting = true;
+    //   waiting_until = time(NULL) + 1;
+    //   // waiting_until = clock() + 3*CLOCKS_PER_SEC;
+    //   // struct timespec ts = {.tv_sec = 3, .tv_nsec = 0};
+    //   // nanosleep(&ts, NULL);
 
-      current_input.floor = -1;
-      current_input.button = -1;
-    }
+    //   current_input.floor = -1;
+    //   current_input.button = -1;
+    // }
 
     if(elevio_stopButton()) {
       input_pop(NULL);
