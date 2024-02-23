@@ -30,8 +30,7 @@ static order_linked_list_t orders = {
 
 // Do internal events have priority? Should they always be added to the "top" of the queue?
 
-bool operating = false;
-order_element_t *current_action = NULL;
+// FSM must handle stop between floors; in case of new order to previous floor, it must move in reverse direction from previously.
 
 void parse_input(int current_floor) {
   input_element_t order;
@@ -59,17 +58,17 @@ void parse_input(int current_floor) {
     return;
   }
 
-  order_element_t *head = orders.head;
-  int current_direction = dir(head->floor, current_floor);
-  // log_debug("\n     Current floor: %d, Current direction: %d (%s)", current_floor, current_direction, current_direction == 0 ? "off" : current_direction > 0 ? "up" : "down");
-  // log_debug(  " Order destination: %d,   Order direction: %d (%s)", order_destination, order_direction, order_direction == 0 ? "off" : order_direction > 0 ? "up" : "down");
-  // log_debug  ("Action destination: %d,  Action direction: %d (%s)", head->floor,   current_direction, current_direction == 0 ? "off" : current_direction > 0 ? "up" : "down");
-  
   // Check if the order already exists
   if (order_exists(order_destination, order_direction)) {
     log_debug("Order already exists");
     return;
   }
+
+  order_element_t *head = orders.head;
+  int current_direction = dir(head->floor, current_floor);
+  // printf("\n     Current floor: %d, Current direction: %d (%s)\n", current_floor, current_direction, current_direction == 0 ? "off" : current_direction > 0 ? "up" : "down");
+  // printf(  " Order destination: %d,   Order direction: %d (%s)\n", order_destination, order_direction, order_direction == 0 ? "off" : order_direction > 0 ? "up" : "down");
+  // printf  ("Action destination: %d,  Action direction: %d (%s)\n", head->floor,   current_direction, current_direction == 0 ? "off" : current_direction > 0 ? "up" : "down");
 
   // Execute the below "algorithm" in a loop, but with:
   // source (current floor, or previous order in the loop)
@@ -88,12 +87,11 @@ void parse_input(int current_floor) {
     int relative_direction = dir(destination->floor, source->floor);
     int lower_limit = (relative_direction < 0) ? destination->floor : source->floor;
     int upper_limit = (relative_direction < 0) ? source->floor      : destination->floor;
-    int destination_direction = dir(destination->floor, source->floor);
 
     // log_debug("Relative direction: %d", relative_direction);
     // log_debug("Lower limit: %d, Upper limit: %d, Order destination: %d", lower_limit, upper_limit, order_destination);
     if (order_destination >= lower_limit && order_destination <= upper_limit) {
-      if (order_direction == destination_direction || order_direction == 0) {
+      if (order_direction == relative_direction || order_direction == 0) {
         log_debug("Order made along current path: %s", order_direction == 0 ? "to let someone off" : "in the same direction");
         order_insert_before(destination, order_destination, order_direction);
         order_inserted = true;
@@ -150,17 +148,22 @@ void order_insert_before(order_element_t *reference_node, int floor, int directi
         new_order->next = node;
         prev_node->next = new_order;
       }
-      break;
     }
     
     prev_node = node;
     node = node->next;
   }
 
+  // Error handling for while loop
+  if (node != NULL && node == orders.tail) {
+    // Error handling
+    log_fatal("Failed to insert order. Reference order not found in queue");
+    assert(false);
+  }
+
   // Update length of linked list
   orders.length++;
   orders_print();
-
   return;
 }
 
