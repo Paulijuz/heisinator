@@ -52,7 +52,7 @@ input_element_t current_input;
 bool waiting = false;
 time_t waiting_until;
 
-bool moving = false;
+// bool moving = false;
 
 int main() {
   // Initialize elevator

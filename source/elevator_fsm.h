@@ -1,3 +1,5 @@
+#pragma once
+
 #include "queue.h"
 
 // extern bool operating;
