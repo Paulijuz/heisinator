@@ -38,18 +38,6 @@ void parse_input(int current_floor) {
   
   int order_destination = order.floor;
   int order_direction = (order.button == BUTTON_HALL_UP) - (order.button == BUTTON_HALL_DOWN);
-  // int order_direction;
-  // switch (order.button) {
-  //   case BUTTON_HALL_UP:
-  //     order_direction = 1;
-  //     break;
-  //   case BUTTON_HALL_DOWN:
-  //     order_direction = -1;
-  //     break;
-  //   case BUTTON_CAB:
-  //     order_direction = 0;
-  //     break;
-  // }
 
   // If the order queue is empty, add the target floor to the queue
   if (orders_length() == 0) {
@@ -66,13 +54,6 @@ void parse_input(int current_floor) {
 
   order_element_t *head = orders.head;
   int current_direction = dir(head->floor, current_floor);
-  // printf("\n     Current floor: %d, Current direction: %d (%s)\n", current_floor, current_direction, current_direction == 0 ? "off" : current_direction > 0 ? "up" : "down");
-  // printf(  " Order destination: %d,   Order direction: %d (%s)\n", order_destination, order_direction, order_direction == 0 ? "off" : order_direction > 0 ? "up" : "down");
-  // printf  ("Action destination: %d,  Action direction: %d (%s)\n", head->floor,   current_direction, current_direction == 0 ? "off" : current_direction > 0 ? "up" : "down");
-
-  // Execute the below "algorithm" in a loop, but with:
-  // source (current floor, or previous order in the loop)
-  // destination (order destination, or next order in the loop)
 
   // Start at head
   order_element_t first_order = {
@@ -83,6 +64,22 @@ void parse_input(int current_floor) {
   order_element_t *source = &first_order;
   bool order_inserted = false;
   while (destination != NULL && source != NULL) {
+    // Edge case: order is made to top floor, and elevator is going upwards from second top floor
+    if (order_destination == N_FLOORS - 1 && current_floor == N_FLOORS - 2 && destination->direction > 0) {
+      log_debug("Order made to top floor, and elevator is going upwards from second top floor");
+      order_insert_before(destination, order_destination, order_direction);
+      order_inserted = true;
+      break;
+    }
+
+    // Edge case: order is made to bottom floor, and elevator is going downwards from second bottom floor
+    if (order_destination == 0 && current_floor == 1 && destination->direction < 0) {
+      log_debug("Order made to bottom floor, and elevator is going downwards from second bottom floor");
+      order_insert_before(destination, order_destination, order_direction);
+      order_inserted = true;
+      break;
+    }
+
     // Check if the new order fits between two existing orders
     int relative_direction = dir(destination->floor, source->floor);
     int lower_limit = (relative_direction < 0) ? destination->floor : source->floor;
