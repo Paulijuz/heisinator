@@ -79,6 +79,8 @@ void fsm_moving() {
     }
 
     if (get_current_floor() == next_order.floor) {
+        current_direction = DIRN_STOP;
+        elevio_motorDirection(current_direction);
         open_door();
         orders_pop(&next_order);
         set_state(IDLE);
