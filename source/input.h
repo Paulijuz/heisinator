@@ -41,7 +41,14 @@ void input_push(int floor, ButtonType button);
 bool input_pop(input_element_t* input_node);
 bool input_exists(int floor, int button_type);
 int inputs_length(void);
-int input_last_floor(void);
 void inputs_print();
+
 bool input_stop_button_pressed();
 bool input_stop_button_released();
+bool input_stop_button_held();
+
+bool input_door_obstruction();
+
+// Operations
+int get_last_floor(void);
+int get_current_floor(void);

@@ -14,6 +14,11 @@ static bool inputs_held[N_FLOORS][N_BUTTONS] = {0};
 static bool stop_button_state_prev = false;
 static bool stop_button_state_curr = false;
 
+static bool door_obstruction = false;
+
+static int current_floor = -1;
+static int last_floor = -1;
+
 void inputs_read() {
   for(int f = 0; f < N_FLOORS; f++){
     for(int b = 0; b < N_BUTTONS; b++){
@@ -31,11 +36,13 @@ void inputs_read() {
     }
   }
 
-  int floor = elevio_floorSensor();
-  if (floor != -1) set_last_floor(floor);
+  current_floor = elevio_floorSensor();
+  if (current_floor != -1) last_floor = current_floor;
 
   stop_button_state_prev = stop_button_state_curr;
   stop_button_state_curr = elevio_stopButton();
+
+  door_obstruction = elevio_obstruction();
 }
 
 void inputs_print() {
@@ -128,7 +135,23 @@ bool input_exists(int floor, int button_type) {
 bool input_stop_button_pressed() {
   return stop_button_state_curr && !stop_button_state_prev;
 }
-
 bool input_stop_button_released() {
   return !stop_button_state_curr && stop_button_state_prev;
+}
+bool input_stop_button_held() {
+    return stop_button_state_curr;
+}
+
+bool input_door_obstruction() {
+    return door_obstruction;
+}
+
+// Set last floor
+int get_last_floor(void) {
+    return last_floor;
+}
+
+// Get current floor
+int get_current_floor(void) {
+    return current_floor;
 }

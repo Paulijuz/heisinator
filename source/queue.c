@@ -167,7 +167,11 @@ void order_insert_before(order_element_t *reference_node, int floor, int directi
   return;
 }
 
-bool order_pop(order_element_t* node) {
+void orders_peek(order_element_t* node) {
+  if (orders.head != NULL) *node = *orders.head;
+}
+
+bool orders_pop(order_element_t* node) {
   if (orders.head == NULL) return false;
 
   // Set node to the head of the linked list
@@ -183,6 +187,27 @@ bool order_pop(order_element_t* node) {
 
   // Update length of linked list
   orders.length--;
+
+  return true;
+}
+
+bool orders_clear() {
+  // Start at beginning of linked list
+  order_element_t *node = orders.head;
+  
+  // Iterate through linked list
+  while (node != NULL) {
+    order_element_t *temp = node;
+    node = node->next;
+    free(temp);
+  }
+
+  // Update head and tail of linked list
+  orders.head = NULL;
+  orders.tail = NULL;
+
+  // Update length of linked list
+  orders.length = 0;
 
   return true;
 }
