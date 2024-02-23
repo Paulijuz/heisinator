@@ -1,7 +1,5 @@
 #include "queue.h"
 
-extern int last_floor;
-
 // Calculate direction
 int sign(int x) {
   return (x > 0) - (x < 0);
@@ -14,7 +12,7 @@ int dir(int target, int current) {
 }
 
 // Linked list for orders
-static order_linked_list_t order_linked_list = {
+static order_linked_list_t orders = {
   .head = NULL,
   .tail = NULL,
   .length = 0
@@ -61,7 +59,7 @@ void parse_input(int current_floor) {
     return;
   }
 
-  order_element_t *head = order_linked_list.head;
+  order_element_t *head = orders.head;
   int current_direction = dir(head->floor, current_floor);
   // printf("\n     Current floor: %d, Current direction: %d (%s)\n", current_floor, current_direction, current_direction == 0 ? "off" : current_direction > 0 ? "up" : "down");
   // printf(  " Order destination: %d,   Order direction: %d (%s)\n", order_destination, order_direction, order_direction == 0 ? "off" : order_direction > 0 ? "up" : "down");
@@ -82,7 +80,7 @@ void parse_input(int current_floor) {
     .floor = current_floor,
     .direction = current_direction,
   };
-  order_element_t *destination = order_linked_list.head;
+  order_element_t *destination = orders.head;
   order_element_t *source = &first_order;
   bool order_inserted = false;
   while (destination != NULL && source != NULL) {
@@ -123,40 +121,35 @@ void order_insert_before(order_element_t *reference_node, int floor, int directi
   new_order->next = NULL;
 
   // If the head is null (linked list is empty)
-  order_element_t *node = order_linked_list.head;
+  order_element_t *node = orders.head;
   if (node == NULL) {
     printf("Inserted order at head\n");
-    order_linked_list.head = new_order;
-    order_linked_list.tail = new_order;
+    orders.head = new_order;
+    orders.tail = new_order;
   }
 
   // If the reference_node is NULL, insert at end
   else if (reference_node == NULL) {
     printf("Inserted order at tail\n");
-    if (order_linked_list.tail != NULL) order_linked_list.tail->next = new_order;
-    order_linked_list.tail = new_order;
+    if (orders.tail != NULL) orders.tail->next = new_order;
+    orders.tail = new_order;
     node = NULL; // Prevents the loop from running
   }
 
   // Iterate through linked list
-  order_element_t *prev_node = order_linked_list.head;
+  order_element_t *prev_node = orders.head;
   while (node != NULL) {
     printf("Comparing: (%d, %s), (%d, %s)\n", node->floor, node->direction == 0 ? "s" : node->direction > 0 ? "u" : "d", reference_node->floor, reference_node->direction == 0 ? "s" : reference_node->direction > 0 ? "u" : "d");
     if (order_identical(node, reference_node)) {
-      if (node == order_linked_list.head) {
+      if (node == orders.head) {
         printf("Inserted order before head\n");
         new_order->next = node;
-        order_linked_list.head = new_order;
+        orders.head = new_order;
       } else {
         printf("Inserted order before floor: %d\n", reference_node->floor);
         new_order->next = node;
         prev_node->next = new_order;
       }
-
-      // if (node->next == NULL) {
-      //   printf("Also updated tail.\n");
-      //   order_linked_list.tail = new_order;
-      // }
       break;
     }
     
@@ -164,40 +157,29 @@ void order_insert_before(order_element_t *reference_node, int floor, int directi
     node = node->next;
   }
 
-  // Otherwise, search for the reference_node and insert after it
-  // else {
-    
-
-  //   // Update tail of linked list
-  //   if (new_order->next == NULL) {
-  //     printf("Updated tail\n");
-  //     order_linked_list.tail = new_order;
-  //   }
-  // }
-
   // Update length of linked list
-  order_linked_list.length++;
+  orders.length++;
   orders_print();
 
   return;
 }
 
 bool order_pop(order_element_t* node) {
-  if (order_linked_list.head == NULL) return false;
+  if (orders.head == NULL) return false;
 
   // Set node to the head of the linked list
-  if (node != NULL) *node = *order_linked_list.head;
-  order_element_t* temp = order_linked_list.head;
+  if (node != NULL) *node = *orders.head;
+  order_element_t* temp = orders.head;
 
   // Update tail of linked list
-  if (order_linked_list.head == order_linked_list.tail) order_linked_list.tail = NULL;
-  order_linked_list.head = order_linked_list.head->next;
+  if (orders.head == orders.tail) orders.tail = NULL;
+  orders.head = orders.head->next;
 
   // Delete the head of the linked list node and update the head
   free(temp);
 
   // Update length of linked list
-  order_linked_list.length--;
+  orders.length--;
 
   return true;
 }
@@ -209,7 +191,7 @@ bool order_identical(order_element_t* node, order_element_t *reference) {
 
 bool order_exists(int floor, int direction) {
   // Start at beginning of linked list
-  order_element_t *node = order_linked_list.head;
+  order_element_t *node = orders.head;
   
   // Iterate through linked list
   while (node != NULL) {
@@ -223,12 +205,12 @@ bool order_exists(int floor, int direction) {
 }
 
 int orders_length() {
-  return order_linked_list.length;
+  return orders.length;
 }
 
 void orders_print() {
   // Start at beginning of linked list
-  order_element_t *node = order_linked_list.head;
+  order_element_t *node = orders.head;
   
   // Iterate through linked list
   printf("Orders:\n");

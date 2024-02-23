@@ -3,11 +3,12 @@
 #include <signal.h>
 #include <time.h>
 #include <math.h>
+
 #include "driver/elevio.h"
 
 #include "input.h"
 #include "queue.h"
-#include "time.h"
+#include "elevator_fsm.h"
 
 // int main(){
 //     elevio_init();
@@ -63,22 +64,21 @@ int main() {
     }
   }
 
-  printf("=== Button Test Program ===\n");
-  // printf("Press the stop button on the elevator panel to exit\n");  
+  // Print
+  printf("=== Program start ===\n");
 
-  // Startup
-  elevio_motorDirection(DIRN_DOWN);
-  while(last_floor == -1) inputs_read();
-  elevio_motorDirection(DIRN_STOP);
-
+  // Elevator operation
   while (true) {
     // Read inputs
     inputs_read();
 
     // Parse inputs
-    while (input_length() > 0) {
-      parse_input(last_floor);
+    while (inputs_length() > 0) {
+      parse_input(get_last_floor());
     }
+
+    // Execute elevator operation
+    elevator_fsm();
 
     // Check if we are waiting
     // if (waiting) {

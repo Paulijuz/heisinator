@@ -7,13 +7,7 @@
 #include "driver/elevio.h"
 
 #include "queue.h"
-
-// struct {
-//   // Active inputs
-//   linked_list *active_inputs;
-// }
-
-extern int last_floor;
+#include "elevator_fsm.h"
 
 typedef struct input_element_s {
   int floor;
@@ -45,5 +39,6 @@ void inputs_read(void);
 void input_push(int floor, ButtonType button);
 bool input_pop(input_element_t* input_node);
 bool input_exists(int floor, int button_type);
-int input_length(void);
+int inputs_length(void);
+int input_last_floor(void);
 void inputs_print();

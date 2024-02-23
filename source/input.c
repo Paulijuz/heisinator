@@ -3,14 +3,13 @@
 // static readonly_elevator_state_t* elevator_state;
 
 // Linked list for inputs
-static input_linked_list_t input_linked_list = {
+static input_linked_list_t inputs = {
   .head = NULL,
   .tail = NULL,
   .length = 0
 };
 
-int last_floor = -1;
-bool inputs_held[N_FLOORS][N_BUTTONS] = {0};
+static bool inputs_held[N_FLOORS][N_BUTTONS] = {0};
 
 void inputs_read() {
   for(int f = 0; f < N_FLOORS; f++){
@@ -30,7 +29,7 @@ void inputs_read() {
   }
 
   int floor = elevio_floorSensor();
-  if (floor != -1) last_floor = floor;
+  if (floor != -1) set_last_floor(floor);
 }
 
 void inputs_print() {
@@ -38,15 +37,15 @@ void inputs_print() {
   // printf("\033[2J"); // Clear screen
   printf("\nCurrent inputs:\n");
 
-  input_element_t* input_node = input_linked_list.head;
-  if (input_node == NULL) {
+  input_element_t* node = inputs.head;
+  if (node == NULL) {
     printf("[List is empty]\n");
     return;
   }
 
-  while (input_node != NULL) {
-    printf("Floor: %d, Button: %d\n", input_node->floor, input_node->button);
-    input_node = input_node->next;
+  while (node != NULL) {
+    printf("Floor: %d, Button: %d\n", node->floor, node->button);
+    node = node->next;
   }
 }
 
@@ -61,32 +60,32 @@ void input_push(int floor, ButtonType button) {
   new_input->next = NULL;
   
   // Update head and tail of linked list
-  if (input_linked_list.head == NULL) {
-    input_linked_list.head = new_input;
-    input_linked_list.tail = new_input;
+  if (inputs.head == NULL) {
+    inputs.head = new_input;
+    inputs.tail = new_input;
   } else {
-    input_linked_list.tail->next = new_input;
-    input_linked_list.tail = new_input;
+    inputs.tail->next = new_input;
+    inputs.tail = new_input;
   }
 
   // Update length of linked list
-  input_linked_list.length++;
+  inputs.length++;
 
   // Print linked list
   // inputs_print();
 }
 
 bool input_pop(input_element_t* input_node) {
-  if (input_linked_list.head == NULL) return false;
-  elevio_buttonLamp(input_linked_list.head->floor, input_linked_list.head->button, 0);
+  if (inputs.head == NULL) return false;
+  elevio_buttonLamp(inputs.head->floor, inputs.head->button, 0);
   
   // Set input_node to the head of the linked list
-  if (input_node != NULL) *input_node = *input_linked_list.head;
-  input_element_t* temp = input_linked_list.head;
+  if (input_node != NULL) *input_node = *inputs.head;
+  input_element_t* temp = inputs.head;
 
   // Update tail of linked list
-  if (input_linked_list.head == input_linked_list.tail) input_linked_list.tail = NULL;
-  input_linked_list.head = input_linked_list.head->next;
+  if (inputs.head == inputs.tail) inputs.tail = NULL;
+  inputs.head = inputs.head->next;
 
   // Delete the head of the linked list node and update the head
   free(temp);
@@ -95,18 +94,18 @@ bool input_pop(input_element_t* input_node) {
   // inputs_print();
 
   // Update length of linked list
-  input_linked_list.length--;
+  inputs.length--;
 
   return true;
 }
 
-int input_length(void) {
-  return input_linked_list.length;
+int inputs_length(void) {
+  return inputs.length;
 }
 
 bool input_exists(int floor, int button_type) {
   // Start at beginning of linked list
-  input_element_t *input_node = input_linked_list.head;
+  input_element_t *input_node = inputs.head;
   
   // Iterate through linked list
   while (input_node != NULL) {
