@@ -11,6 +11,9 @@ static input_linked_list_t inputs = {
 
 static bool inputs_held[N_FLOORS][N_BUTTONS] = {0};
 
+static bool stop_button_state_prev = false;
+static bool stop_button_state_curr = false;
+
 void inputs_read() {
   for(int f = 0; f < N_FLOORS; f++){
     for(int b = 0; b < N_BUTTONS; b++){
@@ -30,6 +33,9 @@ void inputs_read() {
 
   int floor = elevio_floorSensor();
   if (floor != -1) set_last_floor(floor);
+
+  stop_button_state_prev = stop_button_state_curr;
+  stop_button_state_curr = elevio_stopButton();
 }
 
 void inputs_print() {
@@ -117,4 +123,12 @@ bool input_exists(int floor, int button_type) {
   }
 
   return false;
+}
+
+bool input_stop_button_pressed() {
+  return stop_button_state_curr && !stop_button_state_prev;
+}
+
+bool input_stop_button_released() {
+  return !stop_button_state_curr && stop_button_state_prev;
 }

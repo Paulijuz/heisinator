@@ -58,15 +58,15 @@ int main() {
   // Initialize elevator
   elevio_init();
 
+  // Print
+  printf("=== Program start ===\n");
+
   // Set light off for all buttons
   for(int f = 0; f < N_FLOORS; f++){
     for(int b = 0; b < N_BUTTONS; b++){
       elevio_buttonLamp(f, b, 0);
     }
   }
-
-  // Print
-  printf("=== Program start ===\n");
 
   // Elevator operation
   while (true) {
@@ -122,7 +122,7 @@ int main() {
     //   current_input.button = -1;
     // }
 
-    if(elevio_stopButton()) {
+    if(input_stop_button_pressed()) {
       log_info("Queue deleted.");
       input_pop(NULL);
     }

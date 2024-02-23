@@ -43,3 +43,5 @@ bool input_exists(int floor, int button_type);
 int inputs_length(void);
 int input_last_floor(void);
 void inputs_print();
+bool input_stop_button_pressed();
+bool input_stop_button_released();
