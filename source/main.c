@@ -119,6 +119,6 @@ int main() {
     //   current_input.button = -1;
     // }
 
-    light_sync_init();
+    light_sync();
   }
 }
