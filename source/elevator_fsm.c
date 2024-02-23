@@ -7,6 +7,7 @@ void fsm_idle();
 void fsm_moving();
 void fsm_emergency_stop();
 
+void reset_door_timeout(void);
 void open_door(void);
 void close_door(void);
 
@@ -66,6 +67,9 @@ void fsm_idle() {
 
     if (door_status == DOOR_OPEN && time(NULL) > door_timeout && !input_door_obstruction()) {
         close_door();
+    }
+    if (input_door_obstruction() && door_status == DOOR_OPEN) {
+        reset_door_timeout();
     }
 }
 void fsm_moving() {
@@ -136,9 +140,12 @@ void set_state(states_t state) {
 }
 
 // Door
+void reset_door_timeout(void) {
+    door_timeout = time(NULL) + 3;
+}
 void open_door(void) {
     door_status = DOOR_OPEN;
-    door_timeout = time(NULL) + 3;
+    reset_door_timeout();
 }
 void close_door(void) {
     door_status = DOOR_CLOSED;
