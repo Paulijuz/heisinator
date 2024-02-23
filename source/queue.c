@@ -210,7 +210,7 @@ bool orders_clear_floor(int floor) {
             
             // Update previous node
             if (prev_node == NULL) {
-                if (temp->next != NULL) orders.head = temp->next;
+                orders.head = temp->next;
             } else {
                 prev_node->next = temp->next;
             }
@@ -223,12 +223,15 @@ bool orders_clear_floor(int floor) {
             free(temp);
             orders.length--;
             removed++;
+
+            continue;
         }
 
         prev_node = node;
         node = node->next;
     }
 
+    orders_print();
     return (removed > 0);
 }
 
