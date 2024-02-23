@@ -1,6 +1,6 @@
 #include "light_sync.h"
 
-static bool buttom_lamp_states[N_FLOORS * N_BUTTONS] = {false};
+static bool buttom_lamp_states[N_FLOORS][N_BUTTONS] = {false};
 static bool stop_button_lamp_state = false;
 static int floor_indicator_state = 0;
 
@@ -30,7 +30,7 @@ void light_sync() {
         for(int button_type = 0; button_type < N_BUTTONS; button_type++) {
             bool existance = order_exists(floor, (button_type == BUTTON_HALL_UP) - (button_type == BUTTON_HALL_DOWN));
 
-            if(buttom_lamp_states[N_FLOORS*floor + button_type] != existance) {
+            if(buttom_lamp_states[floor][button_type] != existance) {
                 elevio_buttonLamp(floor, button_type, existance);
             }
         }
