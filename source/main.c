@@ -78,28 +78,22 @@ int main() {
     //   }
 
       moving = true;
-      log_info("Moving %s from floor %d to floor %d", dir > 0 ? "up" : "down", last_floor, current_input.floor);
+      log_info("Moving %s from floor %d to floor %d.", dir > 0 ? "up" : "down", last_floor, current_input.floor);
     }
 
     if(moving && last_floor == current_input.floor) {
       moving = false;
 
-      log_info("Arrived at floor %d", last_floor);
-      log_warning("OH NO!");
-      log_error("wow");
+      log_info("Arrived at floor %d.", last_floor);
+      
       elevio_motorDirection(DIRN_STOP);
-      struct timespec ts;
-      ts.tv_sec = 3;
-      ts.tv_nsec = 0;
-
-      nanosleep(&ts, NULL);
 
       current_input.floor = -1;
       current_input.button = -1;
     }
     
     if(elevio_stopButton()) {
-      log_fatal("DELETE!");
+      log_info("Queue deleted.");
       input_pop(NULL);
     }
   }
