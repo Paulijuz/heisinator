@@ -39,6 +39,7 @@ void order_insert_before(order_element_t*, int floor, int direction);
 bool orders_peek(order_element_t* node);
 bool orders_pop(order_element_t* node);
 bool orders_clear_all();
+bool orders_clear_floor(int floor);
 
 bool order_identical(order_element_t* node, order_element_t *reference);
 bool order_exists(int floor, int direction);
