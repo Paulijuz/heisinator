@@ -110,11 +110,13 @@ void fsm_moving() {
 }
 void fsm_emergency_stop() {
     // Stop elevator
-    elevio_motorDirection(DIRN_STOP);
+    if (current_direction != DIRN_STOP) {
+        elevio_motorDirection(DIRN_STOP);
 
-    // Set previous direction
-    previous_direction = current_direction;
-    current_direction = DIRN_STOP;
+        // Set previous direction
+        previous_direction = current_direction;
+        current_direction = DIRN_STOP;
+    }
 
     // Open door
     if (get_current_floor() != -1) {
