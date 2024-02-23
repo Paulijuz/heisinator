@@ -67,8 +67,7 @@ void parse_input(int current_floor) {
   
   // Check if the order already exists
   if (order_exists(order_destination, order_direction)) {
-    log
-    ("Order already exists\n");
+    log_debug("Order already exists\n");
     return;
   }
 
