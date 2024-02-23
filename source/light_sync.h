@@ -4,4 +4,5 @@
 
 #include "queue.h"
 
+void light_sync_init();
 void light_sync();

@@ -10,6 +10,7 @@
 #include "input.h"
 #include "queue.h"
 #include "elevator_fsm.h"
+#include "light_sync.h"
 
 // int main(){
 //     elevio_init();
@@ -62,11 +63,7 @@ int main() {
   printf("=== Program start ===\n");
 
   // Set light off for all buttons
-  for(int f = 0; f < N_FLOORS; f++){
-    for(int b = 0; b < N_BUTTONS; b++){
-      elevio_buttonLamp(f, b, 0);
-    }
-  }
+  light_sync_init();
 
   // Elevator operation
   while (true) {
@@ -122,9 +119,6 @@ int main() {
     //   current_input.button = -1;
     // }
 
-    if(input_stop_button_pressed()) {
-      log_info("Queue deleted.");
-      input_pop(NULL);
-    }
+    light_sync_init();
   }
 }
