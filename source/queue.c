@@ -112,91 +112,130 @@ void parse_input(int current_floor) {
 }
 
 void order_insert_before(order_element_t *reference_node, int floor, int direction) {
-  // Allocate memory for new order
-  order_element_t* new_order = malloc(sizeof(order_element_t));
-  new_order->floor = floor;
-  new_order->direction = direction;
-  new_order->next = NULL;
+    // Allocate memory for new order
+    order_element_t* new_order = malloc(sizeof(order_element_t));
+    new_order->floor = floor;
+    new_order->direction = direction;
+    new_order->next = NULL;
 
-  // If the head is null (linked list is empty)
-  order_element_t *node = orders.head;
-  if (node == NULL) {
-    log_debug("Inserted order at head");
-    orders.head = new_order;
-    orders.tail = new_order;
-  }
-
-  // If the reference_node is NULL, insert at end
-  else if (reference_node == NULL) {
-    log_debug("Inserted order at tail");
-    if (orders.tail != NULL) orders.tail->next = new_order;
-    orders.tail = new_order;
-    node = NULL; // Prevents the loop from running
-  }
-
-  // Iterate through linked list
-  order_element_t *prev_node = orders.head;
-  while (node != NULL) {
-    log_debug("Comparing: (%d, %s), (%d, %s)", node->floor, node->direction == 0 ? "s" : node->direction > 0 ? "u" : "d", reference_node->floor, reference_node->direction == 0 ? "s" : reference_node->direction > 0 ? "u" : "d");
-    if (order_identical(node, reference_node)) {
-      if (node == orders.head) {
-        log_debug("Inserted order before head");
-        new_order->next = node;
+    // If the head is null (linked list is empty)
+    order_element_t *node = orders.head;
+    if (node == NULL) {
+        log_debug("Inserted order at head");
         orders.head = new_order;
-      } else {
-        log_debug("Inserted order before floor: %d", reference_node->floor);
-        new_order->next = node;
-        prev_node->next = new_order;
-      }
+        orders.tail = new_order;
     }
-    
-    prev_node = node;
-    node = node->next;
-  }
 
-  // Error handling for while loop
-  if (node != NULL && node == orders.tail) {
-    // Error handling
-    log_fatal("Failed to insert order. Reference order not found in queue");
-    assert(false);
-  }
+    // If the reference_node is NULL, insert at end
+    else if (reference_node == NULL) {
+        log_debug("Inserted order at tail");
+        if (orders.tail != NULL) orders.tail->next = new_order;
+        orders.tail = new_order;
+        node = NULL; // Prevents the loop from running
+    }
 
-  // Update length of linked list
-  orders.length++;
-  orders_print();
-  return;
+    // Iterate through linked list
+    order_element_t *prev_node = orders.head;
+    while (node != NULL) {
+        log_debug("Comparing: (%d, %s), (%d, %s)", node->floor, node->direction == 0 ? "s" : node->direction > 0 ? "u" : "d", reference_node->floor, reference_node->direction == 0 ? "s" : reference_node->direction > 0 ? "u" : "d");
+        if (order_identical(node, reference_node)) {
+            if (node == orders.head) {
+                log_debug("Inserted order before head");
+                new_order->next = node;
+                orders.head = new_order;
+            } else {
+                log_debug("Inserted order before floor: %d", reference_node->floor);
+                new_order->next = node;
+                prev_node->next = new_order;
+            }
+        }
+        
+        prev_node = node;
+        node = node->next;
+    }
+
+    // Error handling for while loop
+    if (node != NULL && node == orders.tail) {
+        // Error handling
+        log_fatal("Failed to insert order. Reference order not found in queue");
+        assert(false);
+    }
+
+    // Update length of linked list
+    orders.length++;
+    orders_print();
+    return;
 }
 
 bool orders_peek(order_element_t* node) {
-  if (orders.head != NULL) {
-    *node = *orders.head;
-    return true;
-  }
-  
-  return false;
+    if (orders.head != NULL) {
+        *node = *orders.head;
+        return true;
+    }
+    
+    return false;
 }
 
 bool orders_pop(order_element_t* node) {
-  if (orders.head == NULL) return false;
+    if (orders.head == NULL) return false;
 
-  // Set node to the head of the linked list
-  if (node != NULL) *node = *orders.head;
-  order_element_t* temp = orders.head;
+    // Set node to the head of the linked list
+    if (node != NULL) *node = *orders.head;
+    order_element_t* temp = orders.head;
 
-  // Update tail of linked list
-  if (orders.head == orders.tail) orders.tail = NULL;
-  orders.head = orders.head->next;
+    // Update tail of linked list
+    if (orders.head == orders.tail) orders.tail = NULL;
+    orders.head = orders.head->next;
 
-  // Delete the head of the linked list node and update the head
-  free(temp);
+    // Delete the head of the linked list node and update the head
+    free(temp);
 
-  // Update length of linked list
-  orders.length--;
+    // Update length of linked list
+    orders.length--;
 
-  return true;
+    return true;
+}
+bool orders_clear_floor(int floor) {
+    if (orders.head == NULL) return false;
+
+    // Keep track of how many orders are removed
+    int removed = 0;
+
+    // Start at beginning of linked list
+    order_element_t *node = orders.head;
+    order_element_t *prev_node = NULL;
+
+    // Iterate through linked list
+    while (node != NULL) {
+        if (node->floor == floor) {
+            order_element_t *temp = node;
+            node = node->next;
+            
+            // Update previous node
+            if (prev_node == NULL) {
+                if (temp->next != NULL) orders.head = temp->next;
+            } else {
+                prev_node->next = temp->next;
+            }
+
+            // Update tail of linked list
+            if (temp->next == NULL) {
+                orders.tail = prev_node;
+            }
+
+            free(temp);
+            orders.length--;
+            removed++;
+        }
+
+        prev_node = node;
+        node = node->next;
+    }
+
+    return (removed > 0);
 }
 
-bool orders_clear() {
+bool orders_clear_all() {
   // Start at beginning of linked list
   order_element_t *node = orders.head;
   

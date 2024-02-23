@@ -75,6 +75,7 @@ void fsm_idle() {
 void fsm_moving() {
     order_element_t next_order;
     bool peeked = orders_peek(&next_order);
+    int current_floor = get_current_floor();
 
     if (!peeked) {
         log_error("No orders in queue, but in MOVING state");
@@ -82,17 +83,19 @@ void fsm_moving() {
         return;
     }
 
-    if (get_current_floor() == next_order.floor) {
+    if (current_floor == next_order.floor) {
         current_direction = DIRN_STOP;
         elevio_motorDirection(current_direction);
+        
+        // orders_pop(&next_order); // FIX THIS: This should remove all orders for the current floor, not just the first one in the queue.
+        orders_clear_floor(current_floor);
         open_door();
-        orders_pop(&next_order);
         set_state(IDLE);
         return;
     }
     
     // Edge case when elevator is between floors, and the next order is to the previous floor
-    if (get_current_floor() == -1 && get_last_floor() == next_order.floor) {
+    if (current_floor == -1 && get_last_floor() == next_order.floor) {
         if (previous_direction == DIRN_STOP) {
             log_error("Elevator is between floors, and the next order is to the previous floor, but previous direction is DIRN_STOP");
             elevio_motorDirection(DIRN_DOWN);
@@ -124,7 +127,7 @@ void fsm_emergency_stop() {
     }
 
     // Clear all orders
-    orders_clear();
+    orders_clear_all();
 
     // Wait for stop button to be released
     if (!input_stop_button_held()) {
