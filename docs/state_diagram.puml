@@ -3,44 +3,52 @@ title "Tilstandsdiagram for heis__kontroller__"
 
 state "Normal operasjon" as normal
 state "Oppstart" as oppstart
-state "Normal nødstopp" as normal_stoppet
-state "Oppstarts nødstopp" as oppstart_stoppet
+state "Nødstopp" as stoppet
+'state "Oppstarts nødstopp" as oppstart_stoppet
 'state "Forvirret" as forvirret
 
 state normal {
-  state "Bevegelse" as bevegelse
-  state "Klar" as klar 
-  state "Betjening" as betjening
+state "Bevegelse" as bevegelse
+state "Stanset" as stanset 
+'state "Betjening" as betjening
 
-  [*] --> klar
+  [*] -down-> stanset
 
-  klar -down-> bevegelse: Mottar bestilling\nfor etasje N
-  klar: Klar i kjent tillstand\nfor å ta bestilling.
-  klar: Beveger seg ikke.
+  stanset -down-> bevegelse: Mottar bestilling\n[dør lukket]\n
+'stanset --> stoppet: Stoppknapp trykkes
+  stanset --> stanset: 3 sekunder har gått\n[dør åpen og ingen obstruksjon]\n / dør lukkes
+  stanset: Klar i kjent tillstand\nfor å ta bestilling.
+  stanset: Beveger seg ikke.
   
-  bevegelse --> bevegelse: Mottar ny bestilling\nfor etasje N
-  bevegelse -up-> betjening: Treffer\netasje N
+  bevegelse --> bevegelse: Mottar bestilling
+'bevegelse --> stoppet: Stoppknapp trykkes
+  bevegelse -up-> stanset: Treffer etasje N\n/ åpne dør
+'bevegelse -up-> betjening: Treffer\netasje N
   bevegelse: Beveger seg til\nbestilt etasje N.
 
-  betjening -left-> klar: 3 sekunder har gått\nog ingen obstruksjon
-  betjening: Betjener etasje N.
-  betjening: Døren er åpen.
+'betjening -left-> klar: 3 sekunder har gått\nog ingen obstruksjon
+'betjening: Betjener etasje N.
+'betjening: Døren er åpen.
   
-  normal --> normal_stoppet: Stoppknapp\ntrykkes
+  normal -up-> stoppet: Stoppknapp inne\n[i etasje]\n / åpne dør
+  normal -up-> stoppet: Stoppknapp inne\n[utenfor etasje]
 'normal --> forvirret: Treffer\nuforventet\netasje
 }
 
-[*] --> oppstart
+[*] -down-> oppstart
 
-oppstart --> normal: Treffer\netasje N
-oppstart -right-> oppstart_stoppet: Stoppknapp\ntrykkes
+oppstart -down-> normal: Treffer etasje N
+oppstart -right-> stoppet: Stoppknapp inne
 oppstart: Beveger seg\n__forsiktig__ nedover.
 
-oppstart_stoppet -left-> oppstart: Stoppknapp\nslippes
-oppstart_stoppet: Stoppet i ukjent tilstand.
+'oppstart_stoppet -left-> oppstart: Stoppknapp\nslippes
+'oppstart_stoppet: Stoppet i ukjent tilstand.
 
-normal_stoppet --> normal: Stoppknapp\nslippes\nog 3 sekunder\nhar gått
-normal_stoppet: Stoppet i vilkårlig tilstand.
-normal_stoppet: Dør åpen hvis i en etasje.
+stoppet -down-> normal: Stoppknapp ute\n[kjent tilstand]
+stoppet -left-> oppstart: Stoppknapp ute\n[ukjent tilstand]
+stoppet: Stoppet i vilkårlig tilstand.
+stoppet: Blokkerer og sletter bestillnger.
+stoppet: 
+stoppet:  
 
 @enduml
