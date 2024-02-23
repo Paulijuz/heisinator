@@ -31,6 +31,7 @@ void light_sync() {
             bool existance = order_exists(floor, (button_type == BUTTON_HALL_UP) - (button_type == BUTTON_HALL_DOWN));
 
             if(buttom_lamp_states[floor][button_type] != existance) {
+                buttom_lamp_states[floor][button_type] = existance;
                 elevio_buttonLamp(floor, button_type, existance);
             }
         }
