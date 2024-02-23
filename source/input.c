@@ -35,16 +35,16 @@ void inputs_read() {
 void inputs_print() {
   // Print
   // printf("\033[2J"); // Clear screen
-  log_debug("\nCurrent inputs:\n");
+  log_debug("\nCurrent inputs:");
 
   input_element_t* node = inputs.head;
   if (node == NULL) {
-    log_debug("[List is empty]\n");
+    log_debug("[List is empty]");
     return;
   }
 
   while (node != NULL) {
-    log_debug("Floor: %d, Button: %d\n", node->floor, node->button);
+    log_debug("Floor: %d, Button: %d", node->floor, node->button);
     node = node->next;
   }
 }
