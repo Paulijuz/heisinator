@@ -155,3 +155,7 @@ void open_door(void) {
 void close_door(void) {
     door_status = DOOR_CLOSED;
 }
+
+bool get_door_open() {
+    return door_status == DOOR_OPEN;
+}

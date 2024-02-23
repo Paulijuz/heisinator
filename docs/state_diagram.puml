@@ -12,9 +12,9 @@ state "Bevegelse" as bevegelse
 state "Stanset" as stanset 
 'state "Betjening" as betjening
 
-  [*] -down-> stanset
+  [*] --> stanset
 
-  stanset -down-> bevegelse: Mottar bestilling\n[dør lukket]\n
+  stanset --> bevegelse: Mottar bestilling\n[dør lukket]\n
 'stanset --> stoppet: Stoppknapp trykkes
   stanset --> stanset: 3 sekunder har gått\n[dør åpen og ingen obstruksjon]\n / dør lukkes
   stanset: Klar i kjent tillstand\nfor å ta bestilling.
@@ -30,8 +30,8 @@ state "Stanset" as stanset
 'betjening: Betjener etasje N.
 'betjening: Døren er åpen.
   
-  normal -up-> stoppet: Stoppknapp inne\n[i etasje]\n / åpne dør
-  normal -up-> stoppet: Stoppknapp inne\n[utenfor etasje]
+  normal --> stoppet: Stoppknapp inne\n[i etasje]\n / åpne dør
+  normal -left-> stoppet: Stoppknapp inne\n[utenfor etasje]
 'normal --> forvirret: Treffer\nuforventet\netasje
 }
 
@@ -44,11 +44,9 @@ oppstart: Beveger seg\n__forsiktig__ nedover.
 'oppstart_stoppet -left-> oppstart: Stoppknapp\nslippes
 'oppstart_stoppet: Stoppet i ukjent tilstand.
 
-stoppet -down-> normal: Stoppknapp ute\n[kjent tilstand]
+stoppet --> normal: Stoppknapp ute\n[kjent tilstand]
 stoppet -left-> oppstart: Stoppknapp ute\n[ukjent tilstand]
 stoppet: Stoppet i vilkårlig tilstand.
 stoppet: Blokkerer og sletter bestillnger.
-stoppet: 
-stoppet:  
 
 @enduml

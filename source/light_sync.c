@@ -2,6 +2,7 @@
 
 static bool buttom_lamp_states[N_FLOORS][N_BUTTONS] = {false};
 static bool stop_button_lamp_state = false;
+static bool door_lamp_state = false;
 static int floor_indicator_state = 0;
 
 /**
@@ -49,5 +50,12 @@ void light_sync() {
     if (floor_indicator_state != last_floor && last_floor != -1) {
         floor_indicator_state = last_floor;
         elevio_floorIndicator(floor_indicator_state);
+    }
+
+    // Door lamp
+    bool door_open = get_door_open();
+    if (door_lamp_state != door_open) {
+        door_lamp_state = door_open;
+        elevio_doorOpenLamp(door_lamp_state);
     }
 }
