@@ -1,90 +1,111 @@
 #include "input.h"
 
-static readonly_elevator_state_t* elevator_state;
+// static readonly_elevator_state_t* elevator_state;
 
-static input_linked_list_t* input_linked_list_head = NULL;
-static input_linked_list_t* input_linked_list_tail = NULL;
+// Linked list for inputs
+static input_linked_list_t inputs = {
+  .head = NULL,
+  .tail = NULL,
+  .length = 0
+};
 
-int last_floor = -1;
+static bool inputs_held[N_FLOORS][N_BUTTONS] = {0};
 
 void inputs_read() {
   for(int f = 0; f < N_FLOORS; f++){
     for(int b = 0; b < N_BUTTONS; b++){
-      int btnPressed = elevio_callButton(f, b);
+      // Check if button is held
+      int button_pressed = elevio_callButton(f, b);
+      bool button_held = inputs_held[f][b];
 
       // Check if element already exists in linked list
-      if (!input_exists(f, b) && btnPressed) {
+      if (button_pressed && !button_held && !input_exists(f, b)) {
         input_push(f, b);
       }
+
+      // Update inputs_held
+      inputs_held[f][b] = button_pressed;
     }
   }
 
   int floor = elevio_floorSensor();
-
-  if (floor != -1) last_floor = floor;
+  if (floor != -1) set_last_floor(floor);
 }
 
-void inputs_print(void) {
+void inputs_print() {
   // Print
-  input_linked_list_t* input_node = input_linked_list_head;
+  // printf("\033[2J"); // Clear screen
+  log_debug("\nCurrent inputs:\n");
 
-  log_debug("Current inputs:");
-
-  if (input_node == NULL) {
-    log_debug("[List is empty]");
+  input_element_t* node = inputs.head;
+  if (node == NULL) {
+    log_debug("[List is empty]\n");
     return;
   }
 
-  while (input_node != NULL) {
-    log_debug("Floor: %d, Button: %d", input_node->floor, input_node->button);
-    input_node = input_node->next;
+  while (node != NULL) {
+    log_debug("Floor: %d, Button: %d\n", node->floor, node->button);
+    node = node->next;
   }
 }
 
 void input_push(int floor, ButtonType button) {
   // Allocate memory for new input
-  input_linked_list_t* new_input = malloc(sizeof(input_linked_list_t));
+  input_element_t* new_input = malloc(sizeof(input_element_t));
   elevio_buttonLamp(floor, button, 1);
 
   // Set values for new input
   new_input->floor = floor;
   new_input->button = button;
   new_input->next = NULL;
+  
+  // Update head and tail of linked list
+  if (inputs.head == NULL) {
+    inputs.head = new_input;
+    inputs.tail = new_input;
+  } else {
+    inputs.tail->next = new_input;
+    inputs.tail = new_input;
+  }
 
-  // Update head of linked list
-  if (input_linked_list_head == NULL) input_linked_list_head = new_input;
-  if (input_linked_list_tail == NULL) input_linked_list_tail = new_input;
-  else input_linked_list_tail->next = new_input;
-  input_linked_list_tail = new_input;
+  // Update length of linked list
+  inputs.length++;
 
   // Print linked list
-  inputs_print();
+  // inputs_print();
 }
 
-bool input_pop(input_linked_list_t* input_node) {
-  if (input_linked_list_head == NULL) return false;
-  elevio_buttonLamp(input_linked_list_head->floor, input_linked_list_head->button, 0);
+bool input_pop(input_element_t* input_node) {
+  if (inputs.head == NULL) return false;
+  elevio_buttonLamp(inputs.head->floor, inputs.head->button, 0);
   
   // Set input_node to the head of the linked list
-  if (input_node != NULL) *input_node = *input_linked_list_head;
-  input_linked_list_t* temp = input_linked_list_head;
+  if (input_node != NULL) *input_node = *inputs.head;
+  input_element_t* temp = inputs.head;
 
   // Update tail of linked list
-  if (input_linked_list_head == input_linked_list_tail) input_linked_list_tail = NULL;
-  input_linked_list_head = input_linked_list_head->next;
+  if (inputs.head == inputs.tail) inputs.tail = NULL;
+  inputs.head = inputs.head->next;
 
   // Delete the head of the linked list node and update the head
   free(temp);
 
   // Print linked list
-  inputs_print();
+  // inputs_print();
+
+  // Update length of linked list
+  inputs.length--;
 
   return true;
 }
 
+int inputs_length(void) {
+  return inputs.length;
+}
+
 bool input_exists(int floor, int button_type) {
   // Start at beginning of linked list
-  input_linked_list_t *input_node = input_linked_list_head;
+  input_element_t *input_node = inputs.head;
   
   // Iterate through linked list
   while (input_node != NULL) {
