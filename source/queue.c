@@ -168,7 +168,12 @@ void order_insert_before(order_element_t *reference_node, int floor, int directi
 }
 
 bool orders_peek(order_element_t* node) {
-  if (orders.head != NULL) *node = *orders.head;
+  if (orders.head != NULL) {
+    *node = *orders.head;
+    return true;
+  }
+  
+  return false;
 }
 
 bool orders_pop(order_element_t* node) {
