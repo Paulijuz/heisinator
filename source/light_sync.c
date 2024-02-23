@@ -45,7 +45,7 @@ void light_sync() {
 
     // Floor indicator lamps
     int last_floor = get_last_floor();
-    if (floor_indicator_state != last_floor) {
+    if (floor_indicator_state != last_floor && last_floor != -1) {
         floor_indicator_state = last_floor;
         elevio_floorIndicator(floor_indicator_state);
     }
