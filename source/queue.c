@@ -167,7 +167,7 @@ void order_insert_before(order_element_t *reference_node, int floor, int directi
   return;
 }
 
-void orders_peek(order_element_t* node) {
+bool orders_peek(order_element_t* node) {
   if (orders.head != NULL) *node = *orders.head;
 }
 

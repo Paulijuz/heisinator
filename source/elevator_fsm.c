@@ -59,7 +59,7 @@ void fsm_startup() {
 }
 void fsm_idle() {
     // Check if there are any inputs
-    if (orders_length() > 0 && !open_door) {
+    if (orders_length() > 0 && door_status != DOOR_OPEN) {
         set_state(MOVING);
         return;
     }
