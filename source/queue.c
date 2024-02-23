@@ -148,20 +148,23 @@ void order_insert_before(order_element_t *reference_node, int floor, int directi
         new_order->next = node;
         prev_node->next = new_order;
       }
-      
-      // Update length of linked list
-      orders.length++;
-      orders_print();
-      return;
     }
     
     prev_node = node;
     node = node->next;
   }
 
-  // Error handling
-  log_fatal("Failed to insert order. Reference order not found in queue");
-  assert(false);
+  // Error handling for while loop
+  if (node != NULL && node == orders.tail) {
+    // Error handling
+    log_fatal("Failed to insert order. Reference order not found in queue");
+    assert(false);
+  }
+
+  // Update length of linked list
+  orders.length++;
+  orders_print();
+  return;
 }
 
 bool order_pop(order_element_t* node) {
