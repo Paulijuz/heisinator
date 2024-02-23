@@ -38,18 +38,6 @@ void parse_input(int current_floor) {
   
   int order_destination = order.floor;
   int order_direction = (order.button == BUTTON_HALL_UP) - (order.button == BUTTON_HALL_DOWN);
-  // int order_direction;
-  // switch (order.button) {
-  //   case BUTTON_HALL_UP:
-  //     order_direction = 1;
-  //     break;
-  //   case BUTTON_HALL_DOWN:
-  //     order_direction = -1;
-  //     break;
-  //   case BUTTON_CAB:
-  //     order_direction = 0;
-  //     break;
-  // }
 
   // If the order queue is empty, add the target floor to the queue
   if (orders_length() == 0) {
@@ -66,13 +54,6 @@ void parse_input(int current_floor) {
 
   order_element_t *head = orders.head;
   int current_direction = dir(head->floor, current_floor);
-  // printf("\n     Current floor: %d, Current direction: %d (%s)\n", current_floor, current_direction, current_direction == 0 ? "off" : current_direction > 0 ? "up" : "down");
-  // printf(  " Order destination: %d,   Order direction: %d (%s)\n", order_destination, order_direction, order_direction == 0 ? "off" : order_direction > 0 ? "up" : "down");
-  // printf  ("Action destination: %d,  Action direction: %d (%s)\n", head->floor,   current_direction, current_direction == 0 ? "off" : current_direction > 0 ? "up" : "down");
-
-  // Execute the below "algorithm" in a loop, but with:
-  // source (current floor, or previous order in the loop)
-  // destination (order destination, or next order in the loop)
 
   // Start at head
   order_element_t first_order = {
@@ -83,6 +64,22 @@ void parse_input(int current_floor) {
   order_element_t *source = &first_order;
   bool order_inserted = false;
   while (destination != NULL && source != NULL) {
+    // Edge case: order is made to top floor, and elevator is going upwards from second top floor
+    if (order_destination == N_FLOORS - 1 && current_floor == N_FLOORS - 2 && destination->direction > 0) {
+      log_debug("Order made to top floor, and elevator is going upwards from second top floor");
+      order_insert_before(destination, order_destination, order_direction);
+      order_inserted = true;
+      break;
+    }
+
+    // Edge case: order is made to bottom floor, and elevator is going downwards from second bottom floor
+    if (order_destination == 0 && current_floor == 1 && destination->direction < 0) {
+      log_debug("Order made to bottom floor, and elevator is going downwards from second bottom floor");
+      order_insert_before(destination, order_destination, order_direction);
+      order_inserted = true;
+      break;
+    }
+
     // Check if the new order fits between two existing orders
     int relative_direction = dir(destination->floor, source->floor);
     int lower_limit = (relative_direction < 0) ? destination->floor : source->floor;
@@ -112,91 +109,130 @@ void parse_input(int current_floor) {
 }
 
 void order_insert_before(order_element_t *reference_node, int floor, int direction) {
-  // Allocate memory for new order
-  order_element_t* new_order = malloc(sizeof(order_element_t));
-  new_order->floor = floor;
-  new_order->direction = direction;
-  new_order->next = NULL;
+    // Allocate memory for new order
+    order_element_t* new_order = malloc(sizeof(order_element_t));
+    new_order->floor = floor;
+    new_order->direction = direction;
+    new_order->next = NULL;
 
-  // If the head is null (linked list is empty)
-  order_element_t *node = orders.head;
-  if (node == NULL) {
-    log_debug("Inserted order at head");
-    orders.head = new_order;
-    orders.tail = new_order;
-  }
-
-  // If the reference_node is NULL, insert at end
-  else if (reference_node == NULL) {
-    log_debug("Inserted order at tail");
-    if (orders.tail != NULL) orders.tail->next = new_order;
-    orders.tail = new_order;
-    node = NULL; // Prevents the loop from running
-  }
-
-  // Iterate through linked list
-  order_element_t *prev_node = orders.head;
-  while (node != NULL) {
-    log_debug("Comparing: (%d, %s), (%d, %s)", node->floor, node->direction == 0 ? "s" : node->direction > 0 ? "u" : "d", reference_node->floor, reference_node->direction == 0 ? "s" : reference_node->direction > 0 ? "u" : "d");
-    if (order_identical(node, reference_node)) {
-      if (node == orders.head) {
-        log_debug("Inserted order before head");
-        new_order->next = node;
+    // If the head is null (linked list is empty)
+    order_element_t *node = orders.head;
+    if (node == NULL) {
+        log_debug("Inserted order at head");
         orders.head = new_order;
-      } else {
-        log_debug("Inserted order before floor: %d", reference_node->floor);
-        new_order->next = node;
-        prev_node->next = new_order;
-      }
+        orders.tail = new_order;
     }
-    
-    prev_node = node;
-    node = node->next;
-  }
 
-  // Error handling for while loop
-  if (node != NULL && node == orders.tail) {
-    // Error handling
-    log_fatal("Failed to insert order. Reference order not found in queue");
-    assert(false);
-  }
+    // If the reference_node is NULL, insert at end
+    else if (reference_node == NULL) {
+        log_debug("Inserted order at tail");
+        if (orders.tail != NULL) orders.tail->next = new_order;
+        orders.tail = new_order;
+        node = NULL; // Prevents the loop from running
+    }
 
-  // Update length of linked list
-  orders.length++;
-  orders_print();
-  return;
+    // Iterate through linked list
+    order_element_t *prev_node = orders.head;
+    while (node != NULL) {
+        log_debug("Comparing: (%d, %s), (%d, %s)", node->floor, node->direction == 0 ? "s" : node->direction > 0 ? "u" : "d", reference_node->floor, reference_node->direction == 0 ? "s" : reference_node->direction > 0 ? "u" : "d");
+        if (order_identical(node, reference_node)) {
+            if (node == orders.head) {
+                log_debug("Inserted order before head");
+                new_order->next = node;
+                orders.head = new_order;
+            } else {
+                log_debug("Inserted order before floor: %d", reference_node->floor);
+                new_order->next = node;
+                prev_node->next = new_order;
+            }
+        }
+        
+        prev_node = node;
+        node = node->next;
+    }
+
+    // Error handling for while loop
+    if (node != NULL && node == orders.tail) {
+        // Error handling
+        log_fatal("Failed to insert order. Reference order not found in queue");
+        assert(false);
+    }
+
+    // Update length of linked list
+    orders.length++;
+    orders_print();
+    return;
 }
 
 bool orders_peek(order_element_t* node) {
-  if (orders.head != NULL) {
-    *node = *orders.head;
-    return true;
-  }
-  
-  return false;
+    if (orders.head != NULL) {
+        *node = *orders.head;
+        return true;
+    }
+    
+    return false;
 }
 
 bool orders_pop(order_element_t* node) {
-  if (orders.head == NULL) return false;
+    if (orders.head == NULL) return false;
 
-  // Set node to the head of the linked list
-  if (node != NULL) *node = *orders.head;
-  order_element_t* temp = orders.head;
+    // Set node to the head of the linked list
+    if (node != NULL) *node = *orders.head;
+    order_element_t* temp = orders.head;
 
-  // Update tail of linked list
-  if (orders.head == orders.tail) orders.tail = NULL;
-  orders.head = orders.head->next;
+    // Update tail of linked list
+    if (orders.head == orders.tail) orders.tail = NULL;
+    orders.head = orders.head->next;
 
-  // Delete the head of the linked list node and update the head
-  free(temp);
+    // Delete the head of the linked list node and update the head
+    free(temp);
 
-  // Update length of linked list
-  orders.length--;
+    // Update length of linked list
+    orders.length--;
 
-  return true;
+    return true;
+}
+bool orders_clear_floor(int floor) {
+    if (orders.head == NULL) return false;
+
+    // Keep track of how many orders are removed
+    int removed = 0;
+
+    // Start at beginning of linked list
+    order_element_t *node = orders.head;
+    order_element_t *prev_node = NULL;
+
+    // Iterate through linked list
+    while (node != NULL) {
+        if (node->floor == floor) {
+            order_element_t *temp = node;
+            node = node->next;
+            
+            // Update previous node
+            if (prev_node == NULL) {
+                if (temp->next != NULL) orders.head = temp->next;
+            } else {
+                prev_node->next = temp->next;
+            }
+
+            // Update tail of linked list
+            if (temp->next == NULL) {
+                orders.tail = prev_node;
+            }
+
+            free(temp);
+            orders.length--;
+            removed++;
+        }
+
+        prev_node = node;
+        node = node->next;
+    }
+
+    return (removed > 0);
 }
 
-bool orders_clear() {
+bool orders_clear_all() {
   // Start at beginning of linked list
   order_element_t *node = orders.head;
   
