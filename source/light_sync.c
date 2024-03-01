@@ -29,11 +29,10 @@ void light_sync() {
     // Button lamps
     for(int floor = 0; floor < N_FLOORS; floor++) {
         for(int button_type = 0; button_type < N_BUTTONS; button_type++) {
-            bool existance = order_exists(floor, (button_type == BUTTON_HALL_UP) - (button_type == BUTTON_HALL_DOWN));
-
-            if(buttom_lamp_states[floor][button_type] != existance) {
-                buttom_lamp_states[floor][button_type] = existance;
-                elevio_buttonLamp(floor, button_type, existance);
+            bool order_exists = orders[floor][button_type];
+            if (buttom_lamp_states[floor][button_type] != order_exists) {
+                buttom_lamp_states[floor][button_type] = true;
+                elevio_buttonLamp(floor, button_type, order_exists);
             }
         }
     }

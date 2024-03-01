@@ -1,17 +1,17 @@
 #include "queue.h"
 
 // Array of orders
-static bool orders[N_FLOORS][N_BUTTONS] = {0};
+bool orders[N_FLOORS][N_BUTTONS] = {0};
 
 bool orders_exists() {
-  for (int floor = 0; floor < N_FLOORS; floor++) {
-    for (int button = 0; button < N_BUTTONS; button++) {
-      if (orders[floor][button]) {
-        return true;
-      }
+    for (int floor = 0; floor < N_FLOORS; floor++) {
+        for (int button = 0; button < N_BUTTONS; button++) {
+            if (orders[floor][button]) {
+                return true;
+            }
+        }
     }
-  }
-  return false;
+    return false;
 }
 
 /**
