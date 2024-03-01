@@ -47,7 +47,7 @@ void elevator_fsm(void) {
 // State functions
 void fsm_startup() {
     // Move elevator down until it reaches a floor
-    if (get_last_floor() == -1) {
+    if (get_current_floor() == -1) {
         fsm_set_direction(DIRN_DOWN);
         return;
     }
@@ -134,7 +134,7 @@ void set_state(states_t state) {
     current_state = state;
 }
 int fsm_get_previous_direction(void) {
-    return current_direction;
+    return previous_direction;
 }
 
 // Door
