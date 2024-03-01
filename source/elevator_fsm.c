@@ -97,9 +97,11 @@ void fsm_moving() {
     if (current_floor == -1 && get_last_floor() == next_order.floor) {
         // Shouldn't happen
         if (previous_direction == DIRN_STOP) {
+            // Elevator doesn't know if it should go up or down
             log_error("Elevator is between floors, and the next order is to the previous floor, but previous direction is DIRN_STOP");
-            elevio_motorDirection(DIRN_DOWN);
-            return;
+            
+            // Soft reset of elevator
+            set_state(STARTUP);
         }
         
         current_direction = -previous_direction;
