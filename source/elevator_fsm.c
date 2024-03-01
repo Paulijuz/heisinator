@@ -83,10 +83,9 @@ void fsm_idle() {
 void fsm_moving() {
     int last_floor = get_last_floor();
     int current_floor = get_current_floor();
-    int current_direction = fsm_get_previous_direction();
 
     // Calculate next movement direction
-    int order_floor = orders_get_floor(last_floor, (current_floor != -1),  current_direction);
+    int order_floor = orders_get_floor(last_floor, current_direction);
     if (order_floor != -1) {
         fsm_set_direction(dir(order_floor, last_floor));
     } else {

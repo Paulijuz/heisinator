@@ -42,11 +42,7 @@ void orders_parse_input() {
  * @return int representing the next floor to move to
  * @return OR -1 if no floor is found
  */
-int orders_get_floor(int floor, bool on_floor, int direction) {
-    if (on_floor && orders_floor_exists(floor)) {
-        return floor;
-    }
-    
+int orders_get_floor(int floor, int direction) {
     // Upward first
     if (direction == DIRN_UP || direction == DIRN_STOP) {
         int floor_found;
