@@ -20,29 +20,32 @@ static int current_floor = -1;
 static int last_floor = -1;
 
 void inputs_read() {
-  for(int f = 0; f < N_FLOORS; f++){
-    for(int b = 0; b < N_BUTTONS; b++){
-      // Check if button is held
-      int button_pressed = elevio_callButton(f, b);
-      bool button_held = inputs_held[f][b];
+    for(int f = 0; f < N_FLOORS; f++){
+        for(int b = 0; b < N_BUTTONS; b++){
+            // Check if button is held
+            int button_pressed = elevio_callButton(f, b);
+            bool button_held = inputs_held[f][b];
 
-      // Check if element already exists in linked list
-      if (button_pressed && !button_held && !input_exists(f, b)) {
-        input_push(f, b);
-      }
+            // Check if element already exists in linked list
+            if (button_pressed && !button_held && !input_exists(f, b)) {
+                input_push(f, b);
+            }
 
-      // Update inputs_held
-      inputs_held[f][b] = button_pressed;
+            // Update inputs_held
+            inputs_held[f][b] = button_pressed;
+        }
     }
-  }
 
-  current_floor = elevio_floorSensor();
-  if (current_floor != -1) last_floor = current_floor;
+    current_floor = elevio_floorSensor();
+    if (current_floor != -1 && last_floor != current_floor) {
+        log_debug("Current floor: %d", current_floor);
+        last_floor = current_floor;
+    }
 
-  stop_button_state_prev = stop_button_state_curr;
-  stop_button_state_curr = elevio_stopButton();
+    stop_button_state_prev = stop_button_state_curr;
+    stop_button_state_curr = elevio_stopButton();
 
-  door_obstruction = elevio_obstruction();
+    door_obstruction = elevio_obstruction();
 }
 
 void inputs_print() {

@@ -32,7 +32,7 @@ int sign(int x);
 int dir(int target, int source);
 
 // Logic function
-void parse_input(int current_floor);
+void parse_input();
 
 // Linked list helper functions
 void order_insert_before(order_element_t*, int floor, int direction);

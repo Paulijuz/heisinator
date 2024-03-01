@@ -32,80 +32,80 @@ static order_linked_list_t orders = {
 
 // FSM must handle stop between floors; in case of new order to previous floor, it must move in reverse direction from previously.
 
-void parse_input(int current_floor) {
-  input_element_t order;
-  if (!input_pop(&order)) return;
-  
-  int order_destination = order.floor;
-  int order_direction = (order.button == BUTTON_HALL_UP) - (order.button == BUTTON_HALL_DOWN);
+void parse_input() {
+    input_element_t order;
+    if (!input_pop(&order)) return;
+    
+    int order_destination = order.floor;
+    int order_direction = (order.button == BUTTON_HALL_UP) - (order.button == BUTTON_HALL_DOWN);
 
-  // If the order queue is empty, add the target floor to the queue
-  if (orders_length() == 0) {
-    log_debug("Creating first order");
-    order_insert_before(NULL, order_destination, order_direction);
-    return;
-  }
-
-  // Check if the order already exists
-  if (order_exists(order_destination, order_direction)) {
-    log_debug("Order already exists");
-    return;
-  }
-
-  order_element_t *head = orders.head;
-  int current_direction = dir(head->floor, current_floor);
-
-  // Start at head
-  order_element_t first_order = {
-    .floor = current_floor,
-    .direction = current_direction,
-  };
-  order_element_t *destination = orders.head;
-  order_element_t *source = &first_order;
-  bool order_inserted = false;
-  while (destination != NULL && source != NULL) {
-    // Edge case: order is made to top floor, and elevator is going upwards from second top floor
-    if (order_destination == N_FLOORS - 1 && current_floor == N_FLOORS - 2 && destination->direction > 0) {
-      log_debug("Order made to top floor, and elevator is going upwards from second top floor");
-      order_insert_before(destination, order_destination, order_direction);
-      order_inserted = true;
-      break;
+    // If the order queue is empty, add the target floor to the queue
+    if (orders_length() == 0) {
+        // log_debug("Creating first order");
+        order_insert_before(NULL, order_destination, order_direction);
+        return;
     }
 
-    // Edge case: order is made to bottom floor, and elevator is going downwards from second bottom floor
-    if (order_destination == 0 && current_floor == 1 && destination->direction < 0) {
-      log_debug("Order made to bottom floor, and elevator is going downwards from second bottom floor");
-      order_insert_before(destination, order_destination, order_direction);
-      order_inserted = true;
-      break;
+    // Check if the order already exists
+    if (order_exists(order_destination, order_direction)) {
+        // log_debug("Order already exists");
+        return;
     }
 
-    // Check if the new order fits between two existing orders
-    int relative_direction = dir(destination->floor, source->floor);
-    int lower_limit = (relative_direction < 0) ? destination->floor : source->floor;
-    int upper_limit = (relative_direction < 0) ? source->floor      : destination->floor;
+    order_element_t *head = orders.head;
+    int previous_floor = get_last_floor();
+    int current_direction = dir(head->floor, previous_floor);
 
-    // log_debug("Relative direction: %d", relative_direction);
-    // log_debug("Lower limit: %d, Upper limit: %d, Order destination: %d", lower_limit, upper_limit, order_destination);
-    if (order_destination >= lower_limit && order_destination <= upper_limit) {
-      if (order_direction == relative_direction || order_direction == 0) {
-        log_debug("Order made along current path: %s", order_direction == 0 ? "to let someone off" : "in the same direction");
-        order_insert_before(destination, order_destination, order_direction);
-        order_inserted = true;
-        break;
-      }
+    // Start at head
+    order_element_t first_order = {
+        .floor = previous_floor + current_direction, // Add direction, so the comparisons are made using the next floor. This prevents an order for the last departed floor from switching the elevator direction.
+        .direction = current_direction,
+    };
+    order_element_t *destination = orders.head;
+    order_element_t *source = &first_order;
+    bool order_inserted = false;
+    while (destination != NULL && source != NULL) {
+
+        // ===== PROBLEM =====
+        // Going up from bottom floor (between bottom and second bottom) and order is made to bottom floor -> bottom floor is prioritized
+
+        // Calculate limits for checking if the order is made along the current path
+        int relative_direction = dir(destination->floor, source->floor);
+        int lower_limit = (relative_direction < 0) ? destination->floor : source->floor;
+        int upper_limit = (relative_direction < 0) ? source->floor      : destination->floor;
+
+        // Logic for adding order to queue
+        if (order_direction == current_direction || order_direction == 0) {
+            if (order_destination >= lower_limit && order_destination <= upper_limit) {
+                // log_debug("Order made along current path: %s", order_direction == 0 ? "to let someone off" : "in the same direction");
+                order_insert_before(destination, order_destination, order_direction);
+                order_inserted = true;
+                break;
+            }
+        }
+        
+        // Check if the order is made to the lowest floor or the highest floor
+        // if (order_destination == 0 && destination->floor == 1 && destination->direction < 0) {
+        //     // order_insert_after(destination, order_destination, order_direction);
+        //     order_inserted = true;
+        //     break;
+        // }
+        // if (order_destination == N_FLOORS - 1 && destination->floor == N_FLOORS - 2 && destination->direction > 0) {
+        //     // order_insert_after(destination, order_destination, order_direction);
+        //     order_inserted = true;
+        //     break;
+        // }
+
+        // Move to next order in the list
+        source = destination;
+        destination = destination->next;
     }
 
-    // Move to next order in the list
-    source = destination;
-    destination = destination->next;
-  }
-
-  // If the order is not made along the current path, add it to the end of the queue
-  if (!order_inserted) {
-    log_debug("Adding order to end of queue:");
-    order_insert_before(NULL, order_destination, order_direction);
-  }
+    // If the order is not made along the current path, add it to the end of the queue
+    if (!order_inserted) {
+        // log_debug("Adding order to end of queue:");
+        order_insert_before(NULL, order_destination, order_direction);
+    }
 }
 
 void order_insert_before(order_element_t *reference_node, int floor, int direction) {
@@ -118,14 +118,14 @@ void order_insert_before(order_element_t *reference_node, int floor, int directi
     // If the head is null (linked list is empty)
     order_element_t *node = orders.head;
     if (node == NULL) {
-        log_debug("Inserted order at head");
+        // log_debug("Inserted order at head");
         orders.head = new_order;
         orders.tail = new_order;
     }
 
     // If the reference_node is NULL, insert at end
     else if (reference_node == NULL) {
-        log_debug("Inserted order at tail");
+        // log_debug("Inserted order at tail");
         if (orders.tail != NULL) orders.tail->next = new_order;
         orders.tail = new_order;
         node = NULL; // Prevents the loop from running
@@ -134,14 +134,14 @@ void order_insert_before(order_element_t *reference_node, int floor, int directi
     // Iterate through linked list
     order_element_t *prev_node = orders.head;
     while (node != NULL) {
-        log_debug("Comparing: (%d, %s), (%d, %s)", node->floor, node->direction == 0 ? "s" : node->direction > 0 ? "u" : "d", reference_node->floor, reference_node->direction == 0 ? "s" : reference_node->direction > 0 ? "u" : "d");
+        // log_debug("Comparing: (%d, %s), (%d, %s)", node->floor, node->direction == 0 ? "s" : node->direction > 0 ? "u" : "d", reference_node->floor, reference_node->direction == 0 ? "s" : reference_node->direction > 0 ? "u" : "d");
         if (order_identical(node, reference_node)) {
             if (node == orders.head) {
-                log_debug("Inserted order before head");
+                // log_debug("Inserted order before head");
                 new_order->next = node;
                 orders.head = new_order;
             } else {
-                log_debug("Inserted order before floor: %d", reference_node->floor);
+                // log_debug("Inserted order before floor: %d", reference_node->floor);
                 new_order->next = node;
                 prev_node->next = new_order;
             }
