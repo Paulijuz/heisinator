@@ -1,5 +1,8 @@
 #include "queue.h"
 
+int orders_check_upward(int floor);
+int orders_check_downward(int floor);
+
 // Array of orders
 bool orders[N_FLOORS][N_BUTTONS] = {0};
 
@@ -12,6 +15,15 @@ bool orders_exists() {
         }
     }
     return false;
+}
+
+void orders_parse_input() {
+    // Parse inputs
+    while (inputs_length() > 0) {
+        input_element_t input;
+        input_pop(&input);
+        orders[input.floor][input.button] = true;
+    }
 }
 
 /**

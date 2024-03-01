@@ -68,7 +68,7 @@ void inputs_print() {
 void input_push(int floor, ButtonType button) {
   // Allocate memory for new input
   input_element_t* new_input = malloc(sizeof(input_element_t));
-  elevio_buttonLamp(floor, button, 1);
+//   elevio_buttonLamp(floor, button, 1);
 
   // Set values for new input
   new_input->floor = floor;
@@ -93,7 +93,7 @@ void input_push(int floor, ButtonType button) {
 
 bool input_pop(input_element_t* input_node) {
   if (inputs.head == NULL) return false;
-  elevio_buttonLamp(inputs.head->floor, inputs.head->button, 0);
+//   elevio_buttonLamp(inputs.head->floor, inputs.head->button, 0);
   
   // Set input_node to the head of the linked list
   if (input_node != NULL) *input_node = *inputs.head;

@@ -67,6 +67,8 @@ void fsm_startup() {
     set_state(IDLE);
 }
 void fsm_idle() {
+    log_debug("Order: %d", orders_exists());
+
     // Check if there are any inputs
     if (orders_exists() && door_status != DOOR_OPEN) {
         set_state(MOVING);
