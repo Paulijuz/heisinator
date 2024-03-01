@@ -2,6 +2,17 @@
 
 #include "elevator_fsm.h"
 
+// Calculate direction
+int sign(int x) {
+  return (x > 0) - (x < 0);
+  // return (x != 0) ? x / abs(x) : 0;
+
+}
+int dir(int target, int current) {
+  int diff = target - current;
+  return sign(diff);
+}
+
 void fsm_startup();
 void fsm_idle();
 void fsm_moving();
@@ -57,7 +68,7 @@ void fsm_startup() {
 }
 void fsm_idle() {
     // Check if there are any inputs
-    if (orders_length() > 0 && door_status != DOOR_OPEN) {
+    if (orders_exists() && door_status != DOOR_OPEN) {
         set_state(MOVING);
         return;
     }
@@ -70,42 +81,27 @@ void fsm_idle() {
     }
 }
 void fsm_moving() {
-    order_element_t next_order;
-    bool peeked = orders_peek(&next_order);
-    int current_floor = get_current_floor();
+    int last_floor = get_last_floor();
+    int current_direction = fsm_get_previous_direction();
 
-    if (!peeked) {
+    // Calculate next movement direction
+    int order_floor = orders_get_floor(last_floor, current_direction);
+    if (order_floor != -1) {
+        fsm_set_direction(dir(order_floor, last_floor));
+    } else {
+        // Edge case
         log_error("No orders in queue, but in MOVING state");
         set_state(IDLE);
         return;
     }
 
-    if (current_floor == next_order.floor) {
+    if (last_floor == order_floor) {
         fsm_set_direction(DIRN_STOP);
         
-        orders_clear_floor(current_floor);
         open_door();
         set_state(IDLE);
         return;
     }
-    
-    // Edge case when elevator is between floors, and the next order is to the previous floor
-    if (current_floor == -1 && get_last_floor() == next_order.floor) {
-        // Shouldn't happen
-        if (previous_direction == DIRN_STOP) {
-            // Elevator doesn't know if it should go up or down
-            log_error("Elevator is between floors, and the next order is to the previous floor, but previous direction is DIRN_STOP");
-            
-            // Soft reset of elevator
-            set_state(STARTUP);
-        }
-        
-        fsm_set_direction(-previous_direction);
-        return;
-    }
-
-    // General case
-    fsm_set_direction(dir(next_order.floor, get_last_floor()));
 }
 void fsm_emergency_stop() {
     // Stop elevator
