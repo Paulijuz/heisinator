@@ -36,65 +36,62 @@ void parse_input() {
     input_element_t order;
     if (!input_pop(&order)) return;
     
-    int order_destination = order.floor;
     int order_direction = (order.button == BUTTON_HALL_UP) - (order.button == BUTTON_HALL_DOWN);
 
     // If the order queue is empty, add the target floor to the queue
     if (orders_length() == 0) {
         // log_debug("Creating first order");
-        order_insert_before(NULL, order_destination, order_direction);
+        order_insert_before(NULL, order.floor, order_direction);
         return;
     }
 
     // Check if the order already exists
-    if (order_exists(order_destination, order_direction)) {
+    if (order_exists(order.floor, order_direction)) {
         // log_debug("Order already exists");
         return;
     }
 
     order_element_t *head = orders.head;
     int previous_floor = get_last_floor();
-    int current_direction = dir(head->floor, previous_floor);
+    int moving_direction = fsm_get_previous_direction();
+
+    // Prioritize current floor
+    if (get_current_floor() == order.floor) {
+        // log_debug("Order made to current floor");
+        order_insert_before(head, order.floor, order_direction);
+        return;
+    }
 
     // Start at head
     order_element_t first_order = {
-        .floor = previous_floor + current_direction, // Add direction, so the comparisons are made using the next floor. This prevents an order for the last departed floor from switching the elevator direction.
-        .direction = current_direction,
+        .floor = previous_floor + moving_direction, // Add direction, so the comparisons are made using the next floor. This prevents an order for the last departed floor from switching the elevator direction.
+        .direction = moving_direction,
     };
     order_element_t *destination = orders.head;
     order_element_t *source = &first_order;
     bool order_inserted = false;
     while (destination != NULL && source != NULL) {
-
-        // ===== PROBLEM =====
-        // Going up from bottom floor (between bottom and second bottom) and order is made to bottom floor -> bottom floor is prioritized
-
         // Calculate limits for checking if the order is made along the current path
         int relative_direction = dir(destination->floor, source->floor);
         int lower_limit = (relative_direction < 0) ? destination->floor : source->floor;
         int upper_limit = (relative_direction < 0) ? source->floor      : destination->floor;
 
         // Logic for adding order to queue
-        if (order_direction == current_direction || order_direction == 0) {
-            if (order_destination >= lower_limit && order_destination <= upper_limit) {
+        if (order_direction == moving_direction || order_direction == 0) {
+            if (order.floor >= lower_limit && order.floor <= upper_limit) {
                 // log_debug("Order made along current path: %s", order_direction == 0 ? "to let someone off" : "in the same direction");
-                order_insert_before(destination, order_destination, order_direction);
+                order_insert_before(destination, order.floor, order_direction);
+                order_inserted = true;
+                break;
+            }
+        } else {
+            if (destination->floor * moving_direction > order.floor * moving_direction) {
+                // log_debug("Order made in opposite direction");
+                order_insert_before(destination, order.floor, order_direction);
                 order_inserted = true;
                 break;
             }
         }
-        
-        // Check if the order is made to the lowest floor or the highest floor
-        // if (order_destination == 0 && destination->floor == 1 && destination->direction < 0) {
-        //     // order_insert_after(destination, order_destination, order_direction);
-        //     order_inserted = true;
-        //     break;
-        // }
-        // if (order_destination == N_FLOORS - 1 && destination->floor == N_FLOORS - 2 && destination->direction > 0) {
-        //     // order_insert_after(destination, order_destination, order_direction);
-        //     order_inserted = true;
-        //     break;
-        // }
 
         // Move to next order in the list
         source = destination;
@@ -104,7 +101,7 @@ void parse_input() {
     // If the order is not made along the current path, add it to the end of the queue
     if (!order_inserted) {
         // log_debug("Adding order to end of queue:");
-        order_insert_before(NULL, order_destination, order_direction);
+        order_insert_before(NULL, order.floor, order_direction);
     }
 }
 

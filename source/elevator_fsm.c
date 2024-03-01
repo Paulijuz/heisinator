@@ -87,7 +87,6 @@ void fsm_moving() {
         current_direction = DIRN_STOP;
         elevio_motorDirection(current_direction);
         
-        // orders_pop(&next_order); // FIX THIS: This should remove all orders for the current floor, not just the first one in the queue.
         orders_clear_floor(current_floor);
         open_door();
         set_state(IDLE);
@@ -96,6 +95,7 @@ void fsm_moving() {
     
     // Edge case when elevator is between floors, and the next order is to the previous floor
     if (current_floor == -1 && get_last_floor() == next_order.floor) {
+        // Shouldn't happen
         if (previous_direction == DIRN_STOP) {
             log_error("Elevator is between floors, and the next order is to the previous floor, but previous direction is DIRN_STOP");
             elevio_motorDirection(DIRN_DOWN);
@@ -142,6 +142,9 @@ states_t get_state(void) {
 }
 void set_state(states_t state) {
     current_state = state;
+}
+int fsm_get_previous_direction(void) {
+    return current_direction;
 }
 
 // Door
