@@ -6,7 +6,15 @@ int orders_check_downward(int floor);
 // Array of orders
 bool orders[N_FLOORS][N_BUTTONS] = {0};
 
-bool orders_exists() {
+bool orders_floor_exists(int floor) {
+    for (int button = 0; button < N_BUTTONS; button++) {
+        if (orders[floor][button]) {
+            return true;
+        }
+    }
+    return false;
+}
+bool orders_any_exist() {
     for (int floor = 0; floor < N_FLOORS; floor++) {
         for (int button = 0; button < N_BUTTONS; button++) {
             if (orders[floor][button]) {
@@ -34,35 +42,51 @@ void orders_parse_input() {
  * @return int representing the next floor to move to
  * @return OR -1 if no floor is found
  */
-int orders_get_floor(int floor, int direction) {
+int orders_get_floor(int floor, bool on_floor, int direction) {
+    if (on_floor && orders_floor_exists(floor)) {
+        return floor;
+    }
+    
     // Upward first
     if (direction == DIRN_UP || direction == DIRN_STOP) {
-        int upward = orders_check_upward(floor);
-        if (upward != -1) return upward;
-        int downwards = orders_check_downward(floor);
-        return downwards;
+        int floor_found;
+        
+        floor_found = orders_check_upward(floor + 1);
+        if (floor_found != -1) return floor_found;
+        
+        floor_found = orders_check_downward(N_FLOORS-1);
+        if (floor_found != -1) return floor_found;
+        
+        floor_found = orders_check_upward(0);
+        return floor_found;
     }
 
     // Downward first
     else {
-        int downwards = orders_check_downward(floor);
-        if (downwards != -1) return downwards;
-        int upward = orders_check_upward(floor);
-        return upward;
+        int floor_found;
+        
+        floor_found = orders_check_downward(floor - 1);
+        if (floor_found != -1) return floor_found;
+
+        floor_found = orders_check_upward(0);
+        if (floor_found != -1) return floor_found;
+
+        floor_found = orders_check_downward(N_FLOORS-1);
+        return floor_found;
     }
 }
-int orders_check_upward(int floor) {
-    for (int i = floor; i < N_FLOORS; i++) {
-        if (orders[i][BUTTON_HALL_UP] || orders[i][BUTTON_CAB]) {
-            return i;
+int orders_check_upward(int from) {
+    for (int floor = from; floor < N_FLOORS; floor++) {
+        if (orders[floor][BUTTON_HALL_UP] || orders[floor][BUTTON_CAB]) {
+            return floor;
         }
     }
     return -1;
 }
-int orders_check_downward(int floor) {
-    for (int i = floor; i >= 0; i--) {
-        if (orders[i][BUTTON_HALL_DOWN] || orders[i][BUTTON_CAB]) {
-            return i;
+int orders_check_downward(int from) {
+    for (int floor = from; floor >= 0; floor--) {
+        if (orders[floor][BUTTON_HALL_DOWN] || orders[floor][BUTTON_CAB]) {
+            return floor;
         }
     }
     return -1;
