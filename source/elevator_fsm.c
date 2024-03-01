@@ -7,6 +7,7 @@ void fsm_idle();
 void fsm_moving();
 void fsm_emergency_stop();
 
+void fsm_set_direction(MotorDirection direction);
 void reset_door_timeout(void);
 void open_door(void);
 void close_door(void);
@@ -47,15 +48,11 @@ void elevator_fsm(void) {
 void fsm_startup() {
     // Move elevator down until it reaches a floor
     if (get_last_floor() == -1) {
-        if (current_direction != DIRN_DOWN) {
-            current_direction = DIRN_DOWN;
-            elevio_motorDirection(current_direction);
-        }
+        fsm_set_direction(DIRN_DOWN);
         return;
     }
     
-    current_direction = DIRN_STOP;
-    elevio_motorDirection(current_direction);
+    fsm_set_direction(DIRN_STOP);
     set_state(IDLE);
 }
 void fsm_idle() {
@@ -84,8 +81,7 @@ void fsm_moving() {
     }
 
     if (current_floor == next_order.floor) {
-        current_direction = DIRN_STOP;
-        elevio_motorDirection(current_direction);
+        fsm_set_direction(DIRN_STOP);
         
         orders_clear_floor(current_floor);
         open_door();
@@ -104,24 +100,16 @@ void fsm_moving() {
             set_state(STARTUP);
         }
         
-        current_direction = -previous_direction;
-        elevio_motorDirection((MotorDirection) current_direction);
+        fsm_set_direction(-previous_direction);
         return;
     }
 
     // General case
-    current_direction = dir(next_order.floor, get_last_floor());
-    elevio_motorDirection((MotorDirection) current_direction);
+    fsm_set_direction(dir(next_order.floor, get_last_floor()));
 }
 void fsm_emergency_stop() {
     // Stop elevator
-    if (current_direction != DIRN_STOP) {
-        elevio_motorDirection(DIRN_STOP);
-
-        // Set previous direction
-        previous_direction = current_direction;
-        current_direction = DIRN_STOP;
-    }
+    fsm_set_direction(DIRN_STOP);
 
     // Open door
     if (get_current_floor() != -1) {
@@ -150,6 +138,16 @@ int fsm_get_previous_direction(void) {
 }
 
 // Door
+void fsm_set_direction(MotorDirection direction) {
+    if (direction == current_direction) return;
+    
+    // Update variables
+    if (current_direction != DIRN_STOP) previous_direction = current_direction;
+    current_direction = direction;
+
+    // Call API
+    elevio_motorDirection(direction);
+}
 void reset_door_timeout(void) {
     door_timeout = time(NULL) + 3;
 }
