@@ -32,14 +32,15 @@ static state_config_t states[] = {
 };
 
 // Current state
-static states_t       current_state     = STARTUP;
+static states_t       current_state       = STARTUP;
+static states_t       previous_state      = -1;
 
 // State variables
-static MotorDirection current_direction  = DIRN_STOP;
-static MotorDirection movment_direction  = DIRN_STOP;
-static MotorDirection stop_direction     = DIRN_STOP;
-static door_state_t   door_status        = DOOR_CLOSED;
-static time_t         door_timeout       = 0;
+static MotorDirection current_direction   = DIRN_STOP; // can be stopped
+static MotorDirection movment_direction   = DIRN_STOP; // should never be stoppet (except at startup)
+static MotorDirection departure_direction = DIRN_STOP; // like movment_direction, but only updated when stopped at a floor
+static door_state_t   door_status         = DOOR_CLOSED;
+static time_t         door_timeout        = 0;
 
 void elevator_fsm(void) {
     // Emergency stop button
@@ -50,6 +51,11 @@ void elevator_fsm(void) {
     // Run operation for current state
     for (int i = 0; i < sizeof(states) / sizeof(states[0]); i++) {
         if (states[i].state == current_state) {
+            if (previous_state != current_state) {
+                previous_state = current_state;
+                log_info("Entered state: %s", states[i].name);
+            }
+
             states[i].operation();
             break;
         }
@@ -108,7 +114,9 @@ void fsm_moving() {
     // the edgecase where if the elevator was stopped between floors and the
     // next order is back to the floor where i came from then it needs to
     // move in the direction it was travelling before it stopped.
-    int direction = dir(order_floor, last_floor);
+    int direction = at_last_floor || last_floor != order_floor
+        ? dir(order_floor, last_floor)
+        : -departure_direction;
 
     fsm_set_direction(direction);
 
@@ -154,11 +162,11 @@ void fsm_set_direction(MotorDirection direction) {
     if (direction == current_direction) return;
 
     // Update variables
-    if (direction == DIRN_STOP) stop_direction = current_direction;
+    if (direction != DIRN_STOP && get_current_floor() != -1) departure_direction = direction;
     if (direction != DIRN_STOP) movment_direction = direction;
     current_direction = direction;
     
-    log_debug("Moving in direction: %d (%d) [%d]", current_direction, movment_direction, stop_direction);
+    log_debug("Moving in direction: %d (%d) [%d]", current_direction, movment_direction, departure_direction);
 
     // Call API
     elevio_motorDirection(direction);

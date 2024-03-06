@@ -38,7 +38,7 @@ void inputs_read() {
 
     current_floor = elevio_floorSensor();
     if (current_floor != -1 && last_floor != current_floor) {
-        log_debug("Current floor: %d", current_floor);
+        log_info("Current floor: %d", current_floor);
         last_floor = current_floor;
     }
 

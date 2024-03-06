@@ -7,7 +7,7 @@
 #define FATAL   4
 #define NO_LOG  5
 
-#define LOG_LEVEL DEBUG
+#define LOG_LEVEL INFO
 
 void log_debug(const char *fmt, ...) {
     #if LOG_LEVEL <= DEBUG
