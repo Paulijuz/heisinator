@@ -114,9 +114,9 @@ void fsm_moving() {
     // the edgecase where if the elevator was stopped between floors and the
     // next order is back to the floor where i came from then it needs to
     // move in the direction it was travelling before it stopped.
-    int direction = at_last_floor || last_floor != order_floor
-        ? dir(order_floor, last_floor)
-        : -departure_direction;
+    int direction = order_floor == last_floor && !at_last_floor
+        ? -departure_direction
+        : dir(order_floor, last_floor);
 
     fsm_set_direction(direction);
 
