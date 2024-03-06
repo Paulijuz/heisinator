@@ -1,3 +1,24 @@
+/**
+ * @file logger.c
+ * @author Theodor Johansson (theodor.lund.johansson@gmail.com)
+ * @brief Module for logging messages to the console.
+ * @version 0.1
+ * @date 2024-03-06
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
+
+/*****************************************************************************/
+/* ANSI C libraries                                                          */
+/*****************************************************************************/
+#include <stdio.h>
+#include <stdarg.h>
+#include <time.h>
+
+/*****************************************************************************/
+/* Module includes                                                           */
+/*****************************************************************************/
 #include "logger.h"
 
 #define DEBUG   0
@@ -7,8 +28,14 @@
 #define FATAL   4
 #define NO_LOG  5
 
-#define LOG_LEVEL INFO
+#define LOG_LEVEL INFO // The current log level
 
+/**
+ * @brief Logging debug messages
+ *
+ * @param fmt Format string
+ * @param ... Format arguments
+ */
 void log_debug(const char *fmt, ...) {
     #if LOG_LEVEL <= DEBUG
         va_list args;
@@ -30,6 +57,12 @@ void log_debug(const char *fmt, ...) {
     #endif
 }
 
+/**
+ * @brief Logging info messages
+ *
+ * @param fmt Format string
+ * @param ... Format arguments
+ */
 void log_info(const char *fmt, ...) {
     #if LOG_LEVEL <= INFO
         va_list args;
@@ -51,6 +84,12 @@ void log_info(const char *fmt, ...) {
     #endif
 }
 
+/**
+ * @brief Logging warning messages
+ *
+ * @param fmt Format string
+ * @param ... Format arguments
+ */
 void log_warning(const char *fmt, ...) {
     #if LOG_LEVEL <= WARNING
         va_list args;
@@ -72,6 +111,12 @@ void log_warning(const char *fmt, ...) {
     #endif
 }
 
+/**
+ * @brief Logging error messages
+ *
+ * @param fmt Format string
+ * @param ... Format arguments
+ */
 void log_error(const char *fmt, ...) {
     #if LOG_LEVEL <= ERROR
         va_list args;
@@ -93,6 +138,12 @@ void log_error(const char *fmt, ...) {
     #endif
 }
 
+/**
+ * @brief Logging fatal messages
+ *
+ * @param fmt Format string
+ * @param ... Format arguments
+ */
 void log_fatal(const char *fmt, ...) {
     #if LOG_LEVEL <= FATAL
         va_list args;
