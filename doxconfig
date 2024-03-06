@@ -950,18 +950,7 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = Core/Inc/cli/ \
-                         Core/Inc/clicommands/ \
-                         Core/Inc/drivers/ \
-                         Core/Inc/prodtest/ \
-                         Core/Inc/tasks/ \
-                         Core/Inc/utilities/ \
-                         Core/Src/cli/ \
-                         Core/Src/clicommands/ \
-                         Core/Src/drivers/ \
-                         Core/Src/prodtest/ \
-                         Core/Src/tasks/ \
-                         Core/Src/utilities/ \
+INPUT                  = source/
 
 
 # This tag can be used to specify the character encoding of the source files
