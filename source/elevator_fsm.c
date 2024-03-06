@@ -14,7 +14,7 @@ int dir(int target, int current) {
 }
 
 void fsm_startup();
-void fsm_idle();
+void fsm_stopped();
 void fsm_moving();
 void fsm_emergency_stop();
 
@@ -26,7 +26,7 @@ void close_door(void);
 // Fill array
 static state_config_t states[] = {
     {STARTUP,        "Startup",        fsm_startup       },
-    {IDLE,           "Idle",           fsm_idle          },
+    {STOPPED,        "Stopped",           fsm_stopped          },
     {MOVING,         "Moving",         fsm_moving        },
     {EMERGENCY_STOP, "Emergency stop", fsm_emergency_stop}
 };
@@ -77,9 +77,9 @@ void fsm_startup() {
     
     // When a floor has been reached elevator is in a known state and ready to start.
     fsm_set_direction(DIRN_STOP);
-    set_state(IDLE);
+    set_state(STOPPED);
 }
-void fsm_idle() {
+void fsm_stopped() {
     // Check if there are any orders and door is closed.
     if (orders_any_exist() && door_status != DOOR_OPEN) {
         set_state(MOVING);
@@ -111,7 +111,7 @@ void fsm_moving() {
     // Log error if something that should happen happens
     if (order_floor < 0 ) {
         log_error("No orders in queue, but in MOVING state");
-        set_state(IDLE);
+        set_state(STOPPED);
         return;
     }
 
@@ -131,7 +131,7 @@ void fsm_moving() {
         orders_clear_floor(current_floor);
         
         open_door();
-        set_state(IDLE);
+        set_state(STOPPED);
         return;
     }
 }
@@ -150,7 +150,7 @@ void fsm_emergency_stop() {
     // Wait for stop button to be released
     if (!input_stop_button_held()) {
         if (get_last_floor() == -1) set_state(STARTUP);
-        else                        set_state(IDLE);
+        else                        set_state(STOPPED);
     }
 }
 

@@ -8,7 +8,7 @@
 // States
 typedef enum states_e {
     STARTUP,
-    IDLE,
+    STOPPED,
     MOVING,
     EMERGENCY_STOP
 } states_t;
