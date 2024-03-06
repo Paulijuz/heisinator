@@ -9,6 +9,8 @@
  *
  */
 
+#pragma once
+
 /**
  * @brief Enum for the different states the elevator can be in
  *
