@@ -29,6 +29,5 @@ typedef struct state_config_s {
 void     elevator_fsm(void);
 states_t get_state(void);
 void     set_state(states_t state);
-int      fsm_get_previous_direction(void);
 
 bool get_door_open();

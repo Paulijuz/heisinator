@@ -36,7 +36,8 @@ static states_t       current_state     = STARTUP;
 
 // State variables
 static MotorDirection current_direction  = DIRN_STOP;
-static MotorDirection previous_direction = DIRN_STOP;
+static MotorDirection movment_direction  = DIRN_STOP;
+static MotorDirection stop_direction     = DIRN_STOP;
 static door_state_t   door_status        = DOOR_CLOSED;
 static time_t         door_timeout       = 0;
 
@@ -63,38 +64,55 @@ void fsm_startup() {
         return;
     }
     
+    // When a floor has been reached elevator is in a known state and ready to start.
     fsm_set_direction(DIRN_STOP);
     set_state(IDLE);
 }
 void fsm_idle() {
-    // Check if there are any inputs
+    // Check if there are any orders and door is closed.
     if (orders_any_exist() && door_status != DOOR_OPEN) {
         set_state(MOVING);
         return;
     }
 
+    // Close the door if door time out has been reached.
     if (door_status == DOOR_OPEN && time(NULL) > door_timeout && !input_door_obstruction()) {
         close_door();
     }
+
+    // Reset door timeout if something keeps the door open.
+    // This can be either door obstruction or door open button.
     if (input_door_obstruction() && door_status == DOOR_OPEN) {
         reset_door_timeout();
     }
 }
+
 void fsm_moving() {
     int last_floor = get_last_floor();
     int current_floor = get_current_floor();
+    int at_last_floor = current_floor == last_floor;
 
     // Calculate next movement direction
-    int order_floor = orders_get_floor(last_floor, current_direction);
-    if (order_floor != -1) {
-        fsm_set_direction(dir(order_floor, last_floor));
-    } else {
-        // Edge case
+    int order_floor = orders_get_floor(last_floor, at_last_floor, movment_direction);
+
+    LOG_INT(order_floor)
+
+    // Log error if something that should happen happens
+    if (order_floor < 0 ) {
         log_error("No orders in queue, but in MOVING state");
         set_state(IDLE);
         return;
     }
 
+    // Set the movment direction based on the order. We also need to handle
+    // the edgecase where if the elevator was stopped between floors and the
+    // next order is back to the floor where i came from then it needs to
+    // move in the direction it was travelling before it stopped.
+    int direction = dir(order_floor, last_floor);
+
+    fsm_set_direction(direction);
+
+    // Stop at ordered floor
     if (current_floor == order_floor) {
         fsm_set_direction(DIRN_STOP);
         orders_clear_floor(current_floor);
@@ -108,7 +126,7 @@ void fsm_emergency_stop() {
     // Stop elevator
     fsm_set_direction(DIRN_STOP);
 
-    // Open door
+    // Open door if at a floor
     if (get_current_floor() != -1) {
         open_door();
     }
@@ -130,24 +148,23 @@ states_t get_state(void) {
 void set_state(states_t state) {
     current_state = state;
 }
-int fsm_get_previous_direction(void) {
-    return previous_direction;
-}
 
-// Door
+// Movment direction
 void fsm_set_direction(MotorDirection direction) {
     if (direction == current_direction) return;
-    
+
     // Update variables
-    if (current_direction != DIRN_STOP) previous_direction = current_direction;
+    if (direction == DIRN_STOP) stop_direction = current_direction;
+    if (direction != DIRN_STOP) movment_direction = direction;
     current_direction = direction;
+    
+    log_debug("Moving in direction: %d (%d) [%d]", current_direction, movment_direction, stop_direction);
 
     // Call API
     elevio_motorDirection(direction);
 }
-void reset_door_timeout(void) {
-    door_timeout = time(NULL) + 3;
-}
+
+// Door
 void open_door(void) {
     door_status = DOOR_OPEN;
     reset_door_timeout();
@@ -155,7 +172,9 @@ void open_door(void) {
 void close_door(void) {
     door_status = DOOR_CLOSED;
 }
-
+void reset_door_timeout(void) {
+    door_timeout = time(NULL) + 3;
+}
 bool get_door_open() {
     return door_status == DOOR_OPEN;
 }

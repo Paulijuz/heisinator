@@ -13,9 +13,9 @@
 extern bool orders[N_FLOORS][N_BUTTONS];
 
 // API
-bool orders_floor_exists(int floor);
+bool orders_floor_exists(int floor, int direction);
 bool orders_any_exist();
-int orders_get_floor(int floor, int direction);
+int orders_get_floor(int floor, int at_floor, int direction);
 
 void orders_parse_input();
 
