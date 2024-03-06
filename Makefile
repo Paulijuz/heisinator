@@ -16,27 +16,14 @@ OBJECTDIR = build
 SOURCES := $(patsubst $(SOURCEDIR)/%, %, $(shell find $(SOURCEDIR) -name '*.c'  ! -name $(EXCLUDE)  ! -path $(EXCLUDE)))
 OBJECTS = $(addprefix $(OBJECTDIR)/, $(SOURCES:.c=.o))
 
-## executable depends on object files: link them
-$(EXECUTABLE): $(OBJECTS) 
-	$(COMPILER) $^ -o $@ $(LDFLAGS)
-
-## object files depend on source files: compile them
-$(OBJECTDIR)/%.o: $(SOURCEDIR)/%.c
-	@mkdir -p $(@D)
-	$(COMPILER) -o $@ -c $(CFLAGS) $<
-
 # Declare which targets are not files, but rather commands for Make
-.PHONY: all rebuild clean docs
+.PHONY: default rebuild clean docs
 
-# Rules to build `all`
-all:
-	@echo "Building $(EXECUTABLE)"
-	$(EXECUTABLE)
-	@echo "Generating documentation"
-	docs
+# Rules to build `default`
+default: $(EXECUTABLE) # Technically, only default because it is the first rule in the file
 
 # Rules to build `rebuild`
-rebuild: clean all
+rebuild: clean default
 
 # Rules to build `clean`
 clean:
@@ -49,3 +36,11 @@ docs: | doxconfig # The pipe symbol ensures that the doxconfig exists before mak
 #	@echo "Opening docs"
 #   @open html/index.html
 
+## executable depends on object files: link them
+$(EXECUTABLE): $(OBJECTS) 
+	$(COMPILER) $^ -o $@ $(LDFLAGS)
+
+## object files depend on source files: compile them
+$(OBJECTDIR)/%.o: $(SOURCEDIR)/%.c
+	@mkdir -p $(@D)
+	$(COMPILER) -o $@ -c $(CFLAGS) $<
