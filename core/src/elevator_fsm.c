@@ -1,17 +1,30 @@
+/**
+ * @file elevator_fsm.c
+ * @author Theodor Johansson (theodor.lund.johansson@gmail.com)
+ * @brief FSM for the elevator
+ * @version 0.1
+ * @date 2024-03-06
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
+
+/*****************************************************************************/
+/* ANSI C includes                                                           */
+/*****************************************************************************/
 #include <time.h>
 
+/*****************************************************************************/
+/* Module includes                                                           */
+/*****************************************************************************/
+#include "queue.h"
 #include "elevator_fsm.h"
 
-// Calculate direction
-int sign(int x) {
-  return (x > 0) - (x < 0);
-  // return (x != 0) ? x / abs(x) : 0;
-
-}
-int dir(int target, int current) {
-  int diff = target - current;
-  return sign(diff);
-}
+/*****************************************************************************/
+/* Local function declarations                                               */
+/*****************************************************************************/
+int  sign(int x);
+int  dir(int target, int current);
 
 void fsm_startup();
 void fsm_stopped();
@@ -23,17 +36,20 @@ void reset_door_timeout(void);
 void open_door(void);
 void close_door(void);
 
-// Fill array
+/*****************************************************************************/
+/* Variable declarations                                                     */
+/*****************************************************************************/
+// Array of states
 static state_config_t states[] = {
-    {STARTUP,        "Startup",        fsm_startup       },
-    {STOPPED,        "Stopped",           fsm_stopped          },
-    {MOVING,         "Moving",         fsm_moving        },
-    {EMERGENCY_STOP, "Emergency stop", fsm_emergency_stop}
+  {STARTUP,        "Startup",        fsm_startup       },
+  {STOPPED,        "Stopped",        fsm_stopped       },
+  {MOVING,         "Moving",         fsm_moving        },
+  {EMERGENCY_STOP, "Emergency stop", fsm_emergency_stop}
 };
 
 // Current state
-static states_t       current_state       = STARTUP;
-static states_t       previous_state      = -1;
+static states_t current_state  = STARTUP;
+static states_t previous_state = -1;
 
 // State variables
 static MotorDirection current_direction   = DIRN_STOP; // can be stopped
@@ -42,6 +58,12 @@ static MotorDirection departure_direction = DIRN_STOP; // like movment_direction
 static door_state_t   door_status         = DOOR_CLOSED;
 static time_t         door_timeout        = 0;
 
+/*****************************************************************************/
+/* Function definitions                                                      */
+/*****************************************************************************/
+/**
+ * @brief Main function for the elevator state machine
+ */
 void elevator_fsm(void) {
     // Emergency stop button
     if (input_stop_button_held()) {
@@ -67,18 +89,30 @@ void elevator_fsm(void) {
     }
 }
 
-// State functions
+// Declare a group of functions
+/**
+ * @name State operation
+ */
+///@{
+
+/**
+ * @brief Startup state operation for the elevator
+ */
 void fsm_startup() {
     // Move elevator down until it reaches a floor
     if (get_current_floor() == -1) {
         fsm_set_direction(DIRN_DOWN);
         return;
     }
-    
+
     // When a floor has been reached elevator is in a known state and ready to start.
     fsm_set_direction(DIRN_STOP);
     set_state(STOPPED);
 }
+
+/**
+ * @brief Stopped state operation for the elevator
+ */
 void fsm_stopped() {
     // Check if there are any orders and door is closed.
     if (orders_any_exist() && door_status != DOOR_OPEN) {
@@ -98,10 +132,13 @@ void fsm_stopped() {
     }
 }
 
+/**
+ * @brief Moving state operation for the elevator
+ */
 void fsm_moving() {
-    int last_floor = get_last_floor();
+    int last_floor    = get_last_floor();
     int current_floor = get_current_floor();
-    int at_last_floor = current_floor == last_floor;
+    int at_last_floor = (current_floor == last_floor);
 
     // Calculate next movement direction
     int order_floor = orders_get_floor(last_floor, at_last_floor, movment_direction);
@@ -109,7 +146,7 @@ void fsm_moving() {
     LOG_INT(order_floor)
 
     // Log error if something that should happen happens
-    if (order_floor < 0 ) {
+    if (order_floor < 0) {
         log_error("No orders in queue, but in MOVING state");
         set_state(STOPPED);
         return;
@@ -119,9 +156,9 @@ void fsm_moving() {
     // the edgecase where if the elevator was stopped between floors and the
     // next order is back to the floor where i came from then it needs to
     // move in the direction it was travelling before it stopped.
-    int direction = order_floor == last_floor && !at_last_floor
-        ? -departure_direction
-        : dir(order_floor, last_floor);
+    int direction = (order_floor == last_floor && !at_last_floor)
+                      ? -departure_direction
+                      : dir(order_floor, last_floor);
 
     fsm_set_direction(direction);
 
@@ -129,12 +166,16 @@ void fsm_moving() {
     if (current_floor == order_floor) {
         fsm_set_direction(DIRN_STOP);
         orders_clear_floor(current_floor);
-        
+
         open_door();
         set_state(STOPPED);
         return;
     }
 }
+
+/**
+ * @brief Emergency stop state operation for the elevator
+ */
 void fsm_emergency_stop() {
     // Stop elevator
     fsm_set_direction(DIRN_STOP);
@@ -149,45 +190,108 @@ void fsm_emergency_stop() {
 
     // Wait for stop button to be released
     if (!input_stop_button_held()) {
-        if (get_last_floor() == -1) set_state(STARTUP);
-        else                        set_state(STOPPED);
+        if (get_last_floor() == -1)
+            set_state(STARTUP);
+        else
+            set_state(STOPPED);
     }
 }
+///@} Close group of functions
 
-// State API
+/**
+ * @brief Gets current state of the elevator FSM
+ *
+ * @return Enum representing the current state
+ */
 states_t get_state(void) {
     return states[current_state].state;
 }
+
+/**
+ * @brief Sets the state of the elevator FSM
+ *
+ * @param[in] state Enum representing the state to set
+ */
 void set_state(states_t state) {
     current_state = state;
 }
 
-// Movment direction
+/**
+ * @brief Sets the direction of the elevator
+ *
+ * @param[in] direction Enum representing the direction to set
+ */
 void fsm_set_direction(MotorDirection direction) {
-    if (direction == current_direction) return;
+    if (direction == current_direction)
+        return;
 
     // Update variables
-    if (direction != DIRN_STOP && get_current_floor() != -1) departure_direction = direction;
-    if (direction != DIRN_STOP) movment_direction = direction;
+    if (direction != DIRN_STOP && get_current_floor() != -1)
+        departure_direction = direction;
+    if (direction != DIRN_STOP)
+        movment_direction = direction;
     current_direction = direction;
-    
+
     log_debug("Moving in direction: %d (%d) [%d]", current_direction, movment_direction, departure_direction);
 
     // Call API
     elevio_motorDirection(direction);
 }
 
-// Door
+/**
+ * @brief Returns the sign of a number
+ *
+ * @param[in] x The number to get the sign of
+
+ * @return sign of the number
+ */
+int sign(int x) {
+    return (x > 0) - (x < 0);
+}
+
+/**
+ * @brief Calculates the relative direction between two floors
+ *
+ * @param[in] target The target floor
+ * @param[in] current The current floor
+ *
+ * @return Relative direction between the two floors
+ */
+int dir(int target, int current) {
+    int diff = target - current;
+    return sign(diff);
+}
+
+/** @name Door functions */
+///@{
+
+/**
+ * @brief Opens the door
+ */
 void open_door(void) {
     door_status = DOOR_OPEN;
     reset_door_timeout();
 }
+
+/**
+ * @brief Closes the door
+ */
 void close_door(void) {
     door_status = DOOR_CLOSED;
 }
+
+/**
+ * @brief Resets the door timeout
+ */
 void reset_door_timeout(void) {
     door_timeout = time(NULL) + 3;
 }
+
+/**
+ * @brief Gets the status of the door
+ *
+ * @return True if the door is open, false if it is closed
+ */
 bool get_door_open() {
-    return door_status == DOOR_OPEN;
+    return (door_status == DOOR_OPEN);
 }
