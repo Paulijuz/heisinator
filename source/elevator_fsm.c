@@ -53,7 +53,12 @@ void elevator_fsm(void) {
         if (states[i].state == current_state) {
             if (previous_state != current_state) {
                 previous_state = current_state;
-                log_info("Entered state: %s", states[i].name);
+
+                if (current_state == EMERGENCY_STOP) {
+                    log_warning("Entered state: %s", states[i].name);
+                } else {
+                    log_info("Entered state: %s", states[i].name);
+                }
             }
 
             states[i].operation();
