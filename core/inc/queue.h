@@ -33,20 +33,15 @@
 /*****************************************************************************/
 /* Public API                                                                */
 /*****************************************************************************/
-/**
- * @brief Array of orders
- */
-extern bool orders[N_FLOORS][N_BUTTONS];
+bool queue_add_order(int floor, ButtonType button);
+bool queue_get_order(int floor, ButtonType button);
 
-// Functions
-void orders_parse_input();
+bool queue_order_exists(int floor, int direction);
+bool queue_any_orders();
 
-bool orders_floor_exists(int floor, int direction);
-bool orders_any_exist();
+int  queue_get_direction(int floor, int at_floor, int direction);
 
-int  orders_get_floor(int floor, int at_floor, int direction);
+void queue_clear_floor(int floor);
+void queue_clear_all();
 
-void orders_clear_floor(int floor);
-void orders_clear_all();
-
-void orders_print();
+void queue_print();

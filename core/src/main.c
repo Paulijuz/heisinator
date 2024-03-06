@@ -27,9 +27,6 @@ int main() {
     // Read inputs
     inputs_read();
 
-    // Parse inputs
-    orders_parse_input();
-
     // Execute elevator operation
     elevator_fsm();
 

@@ -115,7 +115,7 @@ void fsm_startup() {
  */
 void fsm_stopped() {
     // Check if there are any orders and door is closed.
-    if (orders_any_exist() && door_status != DOOR_OPEN) {
+    if (queue_any_orders() && door_status != DOOR_OPEN) {
         set_state(MOVING);
         return;
     }
@@ -141,7 +141,7 @@ void fsm_moving() {
     int at_last_floor = (current_floor == last_floor);
 
     // Calculate next movement direction
-    int order_floor = orders_get_floor(last_floor, at_last_floor, movment_direction);
+    int order_floor = queue_get_direction(last_floor, at_last_floor, movment_direction);
 
     LOG_INT(order_floor)
 
@@ -165,7 +165,7 @@ void fsm_moving() {
     // Stop at ordered floor
     if (current_floor == order_floor) {
         fsm_set_direction(DIRN_STOP);
-        orders_clear_floor(current_floor);
+        queue_clear_floor(current_floor);
 
         open_door();
         set_state(STOPPED);
@@ -186,7 +186,7 @@ void fsm_emergency_stop() {
     }
 
     // Clear all orders
-    orders_clear_all();
+    queue_clear_all();
 
     // Wait for stop button to be released
     if (!input_stop_button_held()) {

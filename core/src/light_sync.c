@@ -29,7 +29,7 @@ void light_sync() {
     // Button lamps
     for(int floor = 0; floor < N_FLOORS; floor++) {
         for(int button_type = 0; button_type < N_BUTTONS; button_type++) {
-            bool order_exists = orders[floor][button_type];
+            bool order_exists = queue_get_order(floor, button_type);
             if (buttom_lamp_states[floor][button_type] != order_exists) {
                 buttom_lamp_states[floor][button_type] = order_exists;
                 elevio_buttonLamp(floor, button_type, order_exists);
