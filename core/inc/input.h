@@ -1,17 +1,41 @@
+/**
+ * @file input.h
+ * @author Theodor Johansson (theodor.lund.johansson@gmail.com)
+ * @brief Header file for input.c
+ * @version 0.1
+ * @date 2024-03-06
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
+
 #pragma once
 
-#include <stddef.h>
+/*****************************************************************************/
+/* ANSI C includes                                                           */
+/*****************************************************************************/
 #include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "elevio.h"
-#include "logger.h"
 
+/*****************************************************************************/
+/* Provided drivers                                                          */
+/*****************************************************************************/
+#include "elevio.h"
+
+/*****************************************************************************/
+/* Module includes                                                           */
+/*****************************************************************************/
+#include "logger.h"
 #include "queue.h"
 #include "elevator_fsm.h"
 
-extern bool inputs_registered[N_FLOORS][N_BUTTONS];
-
+/**
+ * @brief Current state of the elevator
+ *
+ * @param obstruction True if the door is obstructed
+ * @param stop True if the stop button is pressed
+ * @param currently_at_floor True if the elevator is currently at a floor
+ * @param last_known_floor The last known floor of the elevator
+ */
 typedef struct readonly_elevator_state_s {
     // Passive inputs
     bool obstruction;
@@ -22,15 +46,15 @@ typedef struct readonly_elevator_state_s {
     int last_known_floor;
 } readonly_elevator_state_t;
 
-// Need read-functions (not write)
+/*****************************************************************************/
+/* Public API                                                                */
+/*****************************************************************************/
 void inputs_read(void);
 
 bool input_stop_button_pressed();
 bool input_stop_button_released();
 bool input_stop_button_held();
-
 bool input_door_obstruction();
 
-// Operations
 int get_last_floor(void);
 int get_current_floor(void);
