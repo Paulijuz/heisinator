@@ -1,23 +1,25 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <time.h>
-#include <math.h>
+/**
+ * @file main.c
+ * @author Theodor Johansson (theodor.lund.johansson@gmail.com)
+ * @brief Main file for the elevator project
+ * @version 0.1
+ * @date 2024-03-06
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
 
+/*****************************************************************************/
+/* All file includes                                                         */
+/*****************************************************************************/
 #include "elevio.h"
-
-#include "logger.h"
 #include "input.h"
-#include "queue.h"
 #include "elevator_fsm.h"
 #include "light_sync.h"
 
 int main() {
   // Initialize elevator
   elevio_init();
-
-  // Print
-  printf("=== Program start ===\n");
 
   // Set light off for all buttons
   light_sync_init();
@@ -30,6 +32,7 @@ int main() {
     // Execute elevator operation
     elevator_fsm();
 
+    // Update panel lights
     light_sync();
   }
 }
