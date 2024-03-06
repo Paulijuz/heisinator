@@ -1,6 +1,10 @@
 # Project specifics
 elevator
 
+# Doxygen
+html/
+latex/
+
 # VS code
 .vscode/
 
