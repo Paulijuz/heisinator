@@ -1,13 +1,41 @@
+/**
+ * @file light_sync.c
+ * @author Theodor Johansson (theodor.lund.johansson@gmail.com)
+ * @brief Module for synchronizing panel lights with the corresponding internal active inputs.
+ * @version 0.1
+ * @date 2024-03-06
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
+
+/*****************************************************************************/
+/* ANSI C libraries                                                          */
+/*****************************************************************************/
+#include <stdbool.h>
+
+/*****************************************************************************/
+/* Module includes                                                           */
+/*****************************************************************************/
+#include "queue.h"
 #include "light_sync.h"
 
+/*****************************************************************************/
+/* Local variables                                                           */
+/*****************************************************************************/
+/**
+ * @brief Array for storing the state of the panel lights.
+ * @note By remembering the state of the panel lights, we can avoid unnecessary calls to the elevio API, which is slow as fuck for some reason.
+ */
 static bool buttom_lamp_states[N_FLOORS][N_BUTTONS] = {false};
-static bool stop_button_lamp_state = false;
-static bool door_lamp_state = false;
-static int floor_indicator_state = 0;
+
+static bool stop_button_lamp_state = false; // Wether the stop button lamp should be lit
+static bool door_lamp_state        = false; // Wether the door lamp should be lit
+static int  floor_indicator_state  = 0;     // Which floor indicator lamp should be lit
 
 /**
- * Turns of all lights
-*/
+ * @brief Turns off all panel lights.
+ */
 void light_sync_init() {
     log_info("Initializing lamps");
 
@@ -23,8 +51,8 @@ void light_sync_init() {
 }
 
 /**
- * Sets lights to correspond with order queue, stop button state and last floor.
-*/
+ * @brief Sets lights to correspond with order queue, stop button state and last floor.
+ */
 void light_sync() {
     // Button lamps
     for(int floor = 0; floor < N_FLOORS; floor++) {
