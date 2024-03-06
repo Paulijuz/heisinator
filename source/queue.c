@@ -1,12 +1,31 @@
+/**
+ * @file queue.c
+ * @author Theodor Johansson (theodor.lund.johansson@gmail.com)
+ * @brief Implementation of the queue module
+ * @version 0.1
+ * @date 2024-03-06
+ *
+ * @copyright Copyright (c) 2024
+ */
+
+// Include header
 #include "queue.h"
 
-#define DIR_TO_BTN(x) x == 0 ? BUTTON_CAB : (x > 0 ? BUTTON_HALL_UP : BUTTON_HALL_DOWN) 
+// Macros
+/**
+ * @brief Convert a direction to a button
+ * @details  0 -> BUTTON_CAB
+ *           1 -> BUTTON_HALL_UP
+ *          -1 -> BUTTON_HALL_DOWN
+ */
+#define DIR_TO_BTN(x) x == 0 ? BUTTON_CAB : (x > 0 ? BUTTON_HALL_UP : BUTTON_HALL_DOWN)
 
-int orders_check_upward(int floor);
-int orders_check_downward(int floor);
+// Local declarations
+static int orders_check_upward(int floor);
+static int orders_check_downward(int floor);
 
 // Array of orders
-bool orders[N_FLOORS][N_BUTTONS] = {0}; 
+bool orders[N_FLOORS][N_BUTTONS] = {0};
 
 /**
  * Checks if a given order exists.
@@ -22,6 +41,13 @@ bool orders_floor_exists(int floor, int direction) {
     }
     return false;
 }
+
+/**
+ * @brief Checks if any orders exist
+ *
+ * @return true if any orders exist
+ * @return false if no orders exist
+ */
 bool orders_any_exist() {
     for (int floor = 0; floor < N_FLOORS; floor++) {
         for (int button = 0; button < N_BUTTONS; button++) {
@@ -33,6 +59,9 @@ bool orders_any_exist() {
     return false;
 }
 
+/**
+ * @brief Get input from input queue and parse it into the orders array
+ */
 void orders_parse_input() {
     // Parse inputs
     while (inputs_length() > 0) {
@@ -86,6 +115,12 @@ int orders_get_floor(int floor, int at_floor, int direction) {
     return found_floor;
 }
 
+/**
+ * @brief Check for orders upwards from a given floor
+ *
+ * @param from Floor to start checking from
+ * @return int representing the next floor to move to, or -1 if no floor is found
+ */
 int orders_check_upward(int from) {
     for (int floor = from; floor < N_FLOORS; floor++) {
         if (orders[floor][BUTTON_HALL_UP] || orders[floor][BUTTON_CAB]) {
@@ -94,6 +129,13 @@ int orders_check_upward(int from) {
     }
     return -1;
 }
+
+/**
+ * @brief Check for orders downwards from a given floor
+ *
+ * @param from The floor to check orders from.
+ * @return int representing the next floor to move to, or -1 if no floor is found
+ */
 int orders_check_downward(int from) {
     for (int floor = from; floor >= 0; floor--) {
         if (orders[floor][BUTTON_HALL_DOWN] || orders[floor][BUTTON_CAB]) {
@@ -103,17 +145,29 @@ int orders_check_downward(int from) {
     return -1;
 }
 
+/**
+ * @brief Clear all orders at a given floor
+ *
+ * @param floor Floor to clear orders from
+ */
 void orders_clear_floor(int floor) {
     for (int button = 0; button < N_BUTTONS; button++) {
         orders[floor][button] = false;
     }
 }
+
+/**
+ * @brief Clear all orders
+ */
 void orders_clear_all() {
     for (int floor = 0; floor < N_FLOORS; floor++) {
         orders_clear_floor(floor);
     }
 }
 
+/**
+ * @brief Print all orders
+ */
 void orders_print() {
     for (int floor = 0; floor < N_FLOORS; floor++) {
         for (int button = 0; button < N_BUTTONS; button++) {
