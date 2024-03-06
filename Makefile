@@ -1,13 +1,16 @@
 
 EXECUTABLE  = elevator
 
+C_INCLUDES = \
+-Icore/inc \
+-Icore/driver
+
 COMPILER    = clang
-CFLAGS      = -Wall -g -std=gnu11 -fsanitize=address
+CFLAGS      = $(C_INCLUDES) -Wall -g -std=gnu11 -fsanitize=address
 LDFLAGS     = -fsanitize=address
 EXCLUDE     = '*test*'
 
-
-SOURCEDIR = source
+SOURCEDIR = core
 OBJECTDIR = build
 
 SOURCES := $(patsubst $(SOURCEDIR)/%, %, $(shell find $(SOURCEDIR) -name '*.c'  ! -name $(EXCLUDE)  ! -path $(EXCLUDE)))
@@ -25,22 +28,22 @@ $(OBJECTDIR)/%.o: $(SOURCEDIR)/%.c
 # Declare which targets are not files, but rather commands for Make
 .PHONY: all rebuild clean docs
 
-# Build all
+# Rules to build `all`
 all:
 	@echo "Building $(EXECUTABLE)"
 	$(EXECUTABLE)
 	@echo "Generating documentation"
 	docs
 
-# Rebuild all
+# Rules to build `rebuild`
 rebuild: clean all
 
-# Remove all generated files
+# Rules to build `clean`
 clean:
 	rm -f $(EXECUTABLE)
 	rm -rf $(OBJECTDIR)
 
-# Generate documentation
+# Rules to build `docs`
 docs: | doxconfig # The pipe symbol ensures that the doxconfig exists before making the docs
 	doxygen doxconfig
 #	@echo "Opening docs"
