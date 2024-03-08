@@ -2,11 +2,12 @@
 elevator
 
 # Doxygen
-html/
-latex/
+docs/html/
+docs/latex/
 
 # VS code
-.vscode/
+.vscode/*
+!.vscode/c_cpp_properties.json
 
 # Prerequisites
 *.d
