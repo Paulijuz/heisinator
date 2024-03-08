@@ -1,0 +1,12 @@
+{
+    "configurations": [
+        {
+            "name": "default",
+            "includePath": [
+                "core/inc",
+                "core/driver"
+            ]
+        }
+    ],
+    "version": 4
+}
