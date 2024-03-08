@@ -42,7 +42,7 @@ void inputs_read() {
 
             // Check if element already exists in linked list
             if (button_pressed && !button_held) {
-                queue_add_order(f, b);
+                orders_add(f, b);
             }
 
             // Update inputs_held

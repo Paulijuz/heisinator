@@ -25,7 +25,7 @@
 /* Module includes                                                           */
 /*****************************************************************************/
 #include "logger.h"
-#include "queue.h"
+#include "orders.h"
 #include "fsm.h"
 
 /**

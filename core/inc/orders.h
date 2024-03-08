@@ -1,7 +1,7 @@
 /**
- * @file queue.h
+ * @file orders.h
  * @author Theodor Johansson (theodor.lund.johansson@gmail.com)
- * @brief Header file for queue.c
+ * @brief Header file for orders.c
  * @version 0.1
  * @date 2024-03-06
  *
@@ -29,15 +29,15 @@
 /*****************************************************************************/
 /* Public API                                                                */
 /*****************************************************************************/
-bool queue_add_order(int floor, ButtonType button);
-bool queue_get_order(int floor, ButtonType button);
+bool orders_add(int floor, ButtonType button);
+bool orders_get(int floor, ButtonType button);
 
-bool queue_order_exists(int floor, int direction);
-bool queue_any_orders();
+bool orders_direction_exists(int floor, int direction);
+bool orders_any();
 
-int  queue_get_direction(int floor, bool at_floor, int direction);
+int  orders_determine_next(int floor, bool at_floor, int direction);
 
-void queue_clear_floor(int floor);
-void queue_clear_all();
+void orders_clear_floor(int floor);
+void orders_clear_all();
 
-void queue_print();
+void orders_print();

@@ -17,7 +17,7 @@
 /*****************************************************************************/
 /* Module includes                                                           */
 /*****************************************************************************/
-#include "queue.h"
+#include "orders.h"
 #include "fsm.h"
 
 /*****************************************************************************/
@@ -99,7 +99,7 @@ void fsm(void) {
  * @brief Startup state operation for the elevator
  */
 void fsm_startup() {
-    queue_clear_all();
+    orders_clear_all();
 
     // Move elevator down until it reaches a floor
     if (get_current_floor() != -1) {
@@ -118,14 +118,14 @@ void fsm_startup() {
 void fsm_stopped() {
     // Edge case when servicing the current floor
     int current_floor = get_current_floor();
-    if (current_floor != -1 && get_door_open() && (queue_order_exists(current_floor, DIRN_DOWN) || queue_order_exists(current_floor, DIRN_UP))) {
-        queue_clear_floor(current_floor);
+    if (current_floor != -1 && get_door_open() && (orders_direction_exists(current_floor, DIRN_DOWN) || orders_direction_exists(current_floor, DIRN_UP))) {
+        orders_clear_floor(current_floor);
         reset_door_timeout();
         return;
     }
 
     // Check if there are any orders and door is closed.
-    if (queue_any_orders() && !get_door_open()) {
+    if (orders_any() && !get_door_open()) {
         set_state(MOVING);
         return;
     }
@@ -151,13 +151,13 @@ void fsm_moving() {
     bool at_last_floor = (current_floor == last_floor);
 
     // Calculate next movement direction
-    int order_floor = queue_get_direction(last_floor, at_last_floor, movment_direction);
+    int order_floor = orders_determine_next(last_floor, at_last_floor, movment_direction);
 
     LOG_INT(order_floor)
 
     // Log error if something that should happen happens
     if (order_floor < 0) {
-        log_error("No orders in queue, but in MOVING state");
+        log_error("No orders, but in MOVING state");
         set_state(STOPPED);
         return;
     }
@@ -175,7 +175,7 @@ void fsm_moving() {
     // Stop at ordered floor
     if (current_floor == order_floor) {
         fsm_set_direction(DIRN_STOP);
-        queue_clear_floor(current_floor);
+        orders_clear_floor(current_floor);
 
         open_door();
         set_state(STOPPED);
@@ -196,7 +196,7 @@ void fsm_emergency_stop() {
     }
 
     // Clear all orders
-    queue_clear_all();
+    orders_clear_all();
 
     // Wait for stop button to be released
     if (!input_stop_button_held()) {

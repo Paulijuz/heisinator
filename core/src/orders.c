@@ -1,7 +1,7 @@
 /**
- * @file queue.c
+ * @file orders.c
  * @author Theodor Johansson (theodor.lund.johansson@gmail.com)
- * @brief Implementation of the queue module
+ * @brief Implementation of the orders module
  * @version 0.1
  * @date 2024-03-06
  *
@@ -16,7 +16,7 @@
 /*****************************************************************************/
 /* Module includes                                                           */
 /*****************************************************************************/
-#include "queue.h"
+#include "orders.h"
 
 // Macros
 /**
@@ -28,8 +28,8 @@
 #define DIR_TO_BTN(x) x == 0 ? BUTTON_CAB : (x > 0 ? BUTTON_HALL_UP : BUTTON_HALL_DOWN)
 
 // Local declarations
-static int queue_check_upward(int floor);
-static int queue_check_downward(int floor);
+static int orders_check_upward(int floor);
+static int orders_check_downward(int floor);
 
 // Array of orders
 bool orders[N_FLOORS][N_BUTTONS] = {0};
@@ -40,7 +40,7 @@ bool orders[N_FLOORS][N_BUTTONS] = {0};
  * @param floor - Floor of order (0-indexed)
  * @param direction - Direction of order (-1, 0, or 1)
  */
-bool queue_order_exists(int floor, int direction) {
+bool orders_direction_exists(int floor, int direction) {
     assert(floor >= 0);
     assert(floor < N_FLOORS);
 
@@ -58,7 +58,7 @@ bool queue_order_exists(int floor, int direction) {
  * @return true if any orders exist
  * @return false if no orders exist
  */
-bool queue_any_orders() {
+bool orders_any() {
     for (int floor = 0; floor < N_FLOORS; floor++) {
         for (int button = 0; button < N_BUTTONS; button++) {
             if (orders[floor][button]) {
@@ -70,9 +70,9 @@ bool queue_any_orders() {
 }
 
 /**
- * @brief Add an order to the queue
+ * @brief Register an order
  */
-bool queue_add_order(int floor, ButtonType button) {
+bool orders_add(int floor, ButtonType button) {
     assert(floor >= 0);
     assert(floor < N_FLOORS);
 
@@ -81,9 +81,9 @@ bool queue_add_order(int floor, ButtonType button) {
 }
 
 /**
- * @brief Get an order from the queue
+ * @brief Check if an order exists
  */
-bool queue_get_order(int floor, ButtonType button) {
+bool orders_get(int floor, ButtonType button) {
     assert(floor >= 0);
     assert(floor < N_FLOORS);
 
@@ -99,9 +99,9 @@ bool queue_get_order(int floor, ButtonType button) {
  * @return int representing the next floor to move to
  * @return OR -1 if no floor is found
  */
-int queue_get_direction(int floor, bool at_floor, int direction) {
+int orders_determine_next(int floor, bool at_floor, int direction) {
     // Always stop on floor if traveling in same direction
-    if (at_floor && queue_order_exists(floor, direction)) {
+    if (at_floor && orders_direction_exists(floor, direction)) {
         return floor;
     }
 
@@ -111,30 +111,30 @@ int queue_get_direction(int floor, bool at_floor, int direction) {
     if (direction == DIRN_UP) {
         int found_floor;
 
-        found_floor = queue_check_upward(floor + 1);
+        found_floor = orders_check_upward(floor + 1);
         if (found_floor != -1)
             return found_floor;
 
-        found_floor = queue_check_downward(N_FLOORS - 1);
+        found_floor = orders_check_downward(N_FLOORS - 1);
         if (found_floor != -1)
             return found_floor;
 
-        found_floor = queue_check_upward(0);
+        found_floor = orders_check_upward(0);
         return found_floor;
     }
 
     // Find floor prioratized for downwards travel
     int found_floor;
 
-    found_floor = queue_check_downward(floor - 1);
+    found_floor = orders_check_downward(floor - 1);
     if (found_floor != -1)
         return found_floor;
 
-    found_floor = queue_check_upward(0);
+    found_floor = orders_check_upward(0);
     if (found_floor != -1)
         return found_floor;
 
-    found_floor = queue_check_downward(N_FLOORS - 1);
+    found_floor = orders_check_downward(N_FLOORS - 1);
     return found_floor;
 }
 
@@ -144,7 +144,7 @@ int queue_get_direction(int floor, bool at_floor, int direction) {
  * @param from Floor to start checking from
  * @return int representing the next floor to move to, or -1 if no floor is found
  */
-int queue_check_upward(int from) {
+int orders_check_upward(int from) {
     assert(from >= 0);
 
     for (int floor = from; floor < N_FLOORS; floor++) {
@@ -161,7 +161,7 @@ int queue_check_upward(int from) {
  * @param from The floor to check orders from.
  * @return int representing the next floor to move to, or -1 if no floor is found
  */
-int queue_check_downward(int from) {
+int orders_check_downward(int from) {
     assert(from < N_FLOORS);
 
     for (int floor = from; floor >= 0; floor--) {
@@ -177,7 +177,7 @@ int queue_check_downward(int from) {
  *
  * @param floor Floor to clear orders from
  */
-void queue_clear_floor(int floor) {
+void orders_clear_floor(int floor) {
     assert(floor >= 0);
     assert(floor < N_FLOORS);
 
@@ -189,16 +189,16 @@ void queue_clear_floor(int floor) {
 /**
  * @brief Clear all orders
  */
-void queue_clear_all() {
+void orders_clear_all() {
     for (int floor = 0; floor < N_FLOORS; floor++) {
-        queue_clear_floor(floor);
+        orders_clear_floor(floor);
     }
 }
 
 /**
  * @brief Print all orders
  */
-void queue_print() {
+void orders_print() {
     for (int floor = 0; floor < N_FLOORS; floor++) {
         for (int button = 0; button < N_BUTTONS; button++) {
             if (orders[floor][button]) {
