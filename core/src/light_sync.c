@@ -21,6 +21,11 @@
 #include "light_sync.h"
 
 /*****************************************************************************/
+/* Defines                                                                   */
+/*****************************************************************************/
+#define FLOOR_INDICATOR_ROULETTE true
+
+/*****************************************************************************/
 /* Local variables                                                           */
 /*****************************************************************************/
 /**
@@ -39,8 +44,8 @@ static int  floor_indicator_state  = 0;     // Which floor indicator lamp should
 void light_sync_init() {
     log_info("Initializing lamps");
 
-    for(int floor = 0; floor < N_FLOORS; floor++) {
-        for(int button_type = 0; button_type < N_BUTTONS; button_type++) {
+    for (int floor = 0; floor < N_FLOORS; floor++) {
+        for (int button_type = 0; button_type < N_BUTTONS; button_type++) {
             elevio_buttonLamp(floor, button_type, 0);
         }
     }
@@ -74,7 +79,12 @@ void light_sync() {
 
     // Floor indicator lamps
     int last_floor = get_last_floor();
-    if (floor_indicator_state != last_floor && last_floor != -1) {
+    if (last_floor != -1) {
+        if (FLOOR_INDICATOR_ROULETTE) {
+            static int i = 0;
+            elevio_floorIndicator(i++ % 4);
+        }
+    } else if (floor_indicator_state != last_floor) {
         floor_indicator_state = last_floor;
         elevio_floorIndicator(floor_indicator_state);
     }
