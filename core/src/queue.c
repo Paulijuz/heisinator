@@ -162,7 +162,7 @@ int queue_check_upward(int from) {
  * @return int representing the next floor to move to, or -1 if no floor is found
  */
 int queue_check_downward(int from) {
-    fromassert(from < N_FLOORS);
+    assert(from < N_FLOORS);
 
     for (int floor = from; floor >= 0; floor--) {
         if (orders[floor][BUTTON_HALL_DOWN] || orders[floor][BUTTON_CAB]) {
