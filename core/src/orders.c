@@ -72,12 +72,11 @@ bool orders_any() {
 /**
  * @brief Register an order
  */
-bool orders_add(int floor, ButtonType button) {
+void orders_add(int floor, ButtonType button) {
     assert(floor >= 0);
     assert(floor < N_FLOORS);
 
     orders[floor][button] = true;
-    return true;
 }
 
 /**

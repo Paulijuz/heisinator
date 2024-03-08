@@ -4,7 +4,9 @@
             "name": "default",
             "includePath": [
                 "core/inc",
-                "core/driver"
+                "core/driver",
+                "tests/unity",
+                "tests/unit"
             ]
         }
     ],

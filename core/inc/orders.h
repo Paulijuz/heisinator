@@ -29,7 +29,7 @@
 /*****************************************************************************/
 /* Public API                                                                */
 /*****************************************************************************/
-bool orders_add(int floor, ButtonType button);
+void orders_add(int floor, ButtonType button);
 bool orders_get(int floor, ButtonType button);
 
 bool orders_direction_exists(int floor, int direction);
