@@ -146,9 +146,9 @@ void fsm_stopped() {
  * @brief Moving state operation for the elevator
  */
 void fsm_moving() {
-    int last_floor    = get_last_floor();
-    int current_floor = get_current_floor();
-    int at_last_floor = (current_floor == last_floor);
+    int  last_floor    = get_last_floor();
+    int  current_floor = get_current_floor();
+    bool at_last_floor = (current_floor == last_floor);
 
     // Calculate next movement direction
     int order_floor = queue_get_direction(last_floor, at_last_floor, movment_direction);

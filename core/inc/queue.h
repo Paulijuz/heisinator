@@ -35,7 +35,7 @@ bool queue_get_order(int floor, ButtonType button);
 bool queue_order_exists(int floor, int direction);
 bool queue_any_orders();
 
-int  queue_get_direction(int floor, int at_floor, int direction);
+int  queue_get_direction(int floor, bool at_floor, int direction);
 
 void queue_clear_floor(int floor);
 void queue_clear_all();
