@@ -99,35 +99,45 @@ void elevator_fsm(void) {
  * @brief Startup state operation for the elevator
  */
 void fsm_startup() {
+    queue_clear_all();
+
     // Move elevator down until it reaches a floor
-    if (get_current_floor() == -1) {
-        fsm_set_direction(DIRN_DOWN);
+    if (get_current_floor() != -1) {
+        // When a floor has been reached elevator is in a known state and ready to start.
+        fsm_set_direction(DIRN_STOP);
+        set_state(STOPPED);
         return;
     }
 
-    // When a floor has been reached elevator is in a known state and ready to start.
-    fsm_set_direction(DIRN_STOP);
-    set_state(STOPPED);
+    fsm_set_direction(DIRN_DOWN);
 }
 
 /**
  * @brief Stopped state operation for the elevator
  */
 void fsm_stopped() {
+    // Edge case when servicing the current floor
+    int current_floor = get_current_floor();
+    if (current_floor != -1 && get_door_open() && (queue_order_exists(current_floor, DIRN_DOWN) || queue_order_exists(current_floor, DIRN_UP))) {
+        queue_clear_floor(current_floor);
+        reset_door_timeout();
+        return;
+    }
+
     // Check if there are any orders and door is closed.
-    if (queue_any_orders() && door_status != DOOR_OPEN) {
+    if (queue_any_orders() && !get_door_open()) {
         set_state(MOVING);
         return;
     }
 
     // Close the door if door time out has been reached.
-    if (door_status == DOOR_OPEN && time(NULL) > door_timeout && !input_door_obstruction()) {
+    if (get_door_open() && time(NULL) > door_timeout && !input_door_obstruction()) {
         close_door();
     }
 
     // Reset door timeout if something keeps the door open.
     // This can be either door obstruction or door open button.
-    if (input_door_obstruction() && door_status == DOOR_OPEN) {
+    if (input_door_obstruction() && get_door_open()) {
         reset_door_timeout();
     }
 }
