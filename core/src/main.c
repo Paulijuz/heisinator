@@ -14,7 +14,7 @@
 /*****************************************************************************/
 #include "elevio.h"
 #include "input.h"
-#include "elevator_fsm.h"
+#include "fsm.h"
 #include "light_sync.h"
 
 int main() {
@@ -30,7 +30,7 @@ int main() {
     inputs_read();
 
     // Execute elevator operation
-    elevator_fsm();
+    fsm();
 
     // Update panel lights
     light_sync();

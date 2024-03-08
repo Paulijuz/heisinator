@@ -1,5 +1,5 @@
 /**
- * @file elevator_fsm.c
+ * @file fsm.c
  * @author Theodor Johansson (theodor.lund.johansson@gmail.com)
  * @brief FSM for the elevator
  * @version 0.1
@@ -18,7 +18,7 @@
 /* Module includes                                                           */
 /*****************************************************************************/
 #include "queue.h"
-#include "elevator_fsm.h"
+#include "fsm.h"
 
 /*****************************************************************************/
 /* Local function declarations                                               */
@@ -64,7 +64,7 @@ static time_t         door_timeout        = 0;
 /**
  * @brief Main function for the elevator state machine
  */
-void elevator_fsm(void) {
+void fsm(void) {
     // Emergency stop button
     if (input_stop_button_held()) {
         set_state(EMERGENCY_STOP);

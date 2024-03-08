@@ -1,7 +1,7 @@
 /**
- * @file elevator_fsm.h
+ * @file fsm.h
  * @author Theodor Johansson (theodor.lund.johansson@gmail.com)
- * @brief Header file for elevator_fsm.c
+ * @brief Header file for fsm.c
  * @version 0.1
  * @date 2024-03-06
  *
@@ -53,7 +53,7 @@ typedef struct state_config_s {
 /*****************************************************************************/
 /* Public API                                                                */
 /*****************************************************************************/
-void     elevator_fsm(void);
+void     fsm(void);
 states_t get_state(void);
 void     set_state(states_t state);
 

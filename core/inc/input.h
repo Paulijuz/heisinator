@@ -26,7 +26,7 @@
 /*****************************************************************************/
 #include "logger.h"
 #include "queue.h"
-#include "elevator_fsm.h"
+#include "fsm.h"
 
 /**
  * @brief Current state of the elevator
