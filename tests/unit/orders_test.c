@@ -54,5 +54,8 @@ void test_orders_clear_all(void) {
 int main(void) {
     UNITY_BEGIN();
 
+    RUN_TEST(test_orders_add_and_get);
+    RUN_TEST(test_orders_clear_all);
+
     return UNITY_END();
 }
