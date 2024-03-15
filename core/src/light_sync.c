@@ -24,6 +24,7 @@
 /* Defines                                                                   */
 /*****************************************************************************/
 #define FLOOR_INDICATOR_ROULETTE true
+#define FLOOR_INDICATOR_ROULETTE_CLK_DIV 32
 
 /*****************************************************************************/
 /* Local variables                                                           */
@@ -80,9 +81,12 @@ void light_sync() {
     // Floor indicator lamps
     int last_floor = get_last_floor();
     if (last_floor == -1) {
-        if (FLOOR_INDICATOR_ROULETTE) {
-            static int i = 0;
-            elevio_floorIndicator((i++ / 16) % N_FLOORS);
+        static int i = 0;
+        int roulette_state = i++ / FLOOR_INDICATOR_ROULETTE_CLK_DIV % N_FLOORS;
+
+        if (FLOOR_INDICATOR_ROULETTE && floor_indicator_state != roulette_state) {
+            floor_indicator_state = roulette_state;
+            elevio_floorIndicator(roulette_state);
         }
     } else if (floor_indicator_state != last_floor) {
         floor_indicator_state = last_floor;
