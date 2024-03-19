@@ -1,0 +1,29 @@
+@startuml inputs_sekvensdiagram
+title "Sekvensdiagram for inputs"
+
+activate Inputs
+
+loop for alle etasjeknapper
+    Inputs -> Heispanel: Les etasjeknapp
+    activate Heispanel
+    Inputs <-- Heispanel: Etasjeknapptilstand
+    deactivate Heispanel
+
+    opt knapp trykket
+        Inputs -> Orders: Legg inn bestilling for etasje
+        activate Orders
+        deactivate Orders
+    end
+end
+
+Inputs -> Heispanel: Les nødstoppknapp
+activate Heispanel
+Inputs <-- Heispanel: Nødstoppknapptilstand
+deactivate Heispanel
+
+Inputs -> Heis: Les etasje
+activate Heis
+Inputs <-- Heis: Etasjetilstand
+deactivate Heis
+
+@enduml

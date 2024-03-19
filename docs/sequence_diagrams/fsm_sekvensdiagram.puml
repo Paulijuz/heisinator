@@ -1,0 +1,100 @@
+@startuml fsm_sekvensdiagram
+title "Sekvensdiagram for heis__kontroller__"
+
+activate FSM
+
+loop
+    FSM -> Orders: Les neste bestilling
+    activate Orders
+    FSM <-- Orders: Bestilling
+    deactivate Orders
+
+    FSM -> Inputs: Les etasjeinformasjon
+    activate Inputs
+    FSM <-- Inputs: Etasjeinformasjon
+    deactivate Inputs
+
+    FSM -> Inputs: Les nødstopp
+    activate Inputs
+    FSM <-- Inputs: Nødstopptilstand
+    deactivate Inputs
+
+    opt Nødstopp trykket
+        FSM -> FSM: Bytt tilstand til nødstopp
+    end
+
+    alt oppstart
+
+        opt ikke i bevegelse
+            FSM -> Heis: Beveg nedover
+            activate Heis
+            deactivate Heis
+        end
+
+        opt etasje truffet
+            FSM -> FSM: Bytt tilstand til stanset
+        end
+    else nødstopp
+
+        FSM -> Orders: Slett alle bestillinger
+        activate Orders
+        deactivate Orders
+
+        opt ved etasje og dør lukket
+            FSM -> Heis: Åpne dør
+            activate Heis
+            deactivate Heis
+        end
+        
+        opt i bevegelse
+            FSM -> Heis: Stopp
+            activate Heis
+            deactivate Heis
+        end
+        
+        opt nødstop ikke trykket
+            FSM -> FSM: Bytt tilstand til stoppet
+        end
+
+    else stoppet
+
+        alt bestilling finnes og i bestillt etasje
+            FSM -> Heis: Åpne dør
+            activate Heis
+            deactivate Heis
+            FSM -> Orders: Slett bestilling
+            activate Orders
+            deactivate Orders
+        else bestilling finnes og dør lukket
+            FSM -> Heis: Beveg mot bestillt etasje
+            activate Heis
+            deactivate Heis
+            FSM -> FSM: Bytt tilstand til bevegelse
+        end
+
+        opt ingen obstruksjon og dør åpen i 3 s
+            FSM -> Heis: Lukk dør 
+            activate Heis
+            deactivate Heis
+        end
+
+    else bevegelse
+
+        opt ny bestilling
+            FSM -> Heis: Beveg mot bestillt etasje
+            activate Heis
+            deactivate Heis
+        end
+
+        opt i besillt etasje
+            FSM -> Heis: Stopp
+            activate Heis
+            deactivate Heis
+            FSM -> FSM: Bytt tilstand til stoppet
+        end
+
+    end
+
+end
+
+@enduml
