@@ -29,6 +29,8 @@ class orders {
     +add_order()
     +get_orders()
     +get_next_order()
+    +clear_order()
+    +clear_orders()
 }
 
 class fsm {
