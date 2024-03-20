@@ -1,0 +1,60 @@
+@startuml class_diagram
+title "Klassediagram for heisprogramvare"
+
+hide circle
+
+class heis {
+    +get_floor()
+    +get_floor_buttons()
+    +get_obstruction()
+    +set_motor()
+    +set_door_lamp()
+    +set_floor_lamp()
+    +set_floor_button_lamp()
+}
+
+class inputs {
+    -floor_button_states
+    -stop_button_states
+    -obstruction_state
+
+    +run_inputs()
+    +get_floor_buttons()
+    +get_stop_button()
+    +get_obstruction()
+}
+
+class orders {
+    -order_list
+    +add_order()
+    +get_orders()
+    +get_next_order()
+}
+
+class fsm {
+    -fsm_state
+    -door_state
+    +run_fsm()
+    +get_door_state()
+}
+
+class light_sync {
+    -floor_lamp_states
+    -door_lamp_state
+    -stop_lamp_state
+    +run_light_sync()
+}
+
+light_sync .up.> inputs
+light_sync .up.> orders
+light_sync .up.> fsm
+light_sync .up.> heis
+
+fsm .up.> heis
+fsm .left.> inputs
+fsm .up.> orders
+
+inputs .up.> heis
+inputs .up.> orders
+
+@enduml
