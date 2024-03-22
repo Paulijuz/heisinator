@@ -1,0 +1,29 @@
+@startuml fsm_sekvensdiagram
+title "Sekvensdiagram for FSM"
+
+activate FSM
+
+loop
+    FSM -> Orders: Les neste bestilling
+    activate Orders
+    FSM <-- Orders: Bestilling
+    deactivate Orders
+
+    FSM -> Inputs: Les etasjeinformasjon
+    activate Inputs
+    FSM <-- Inputs: Etasjeinformasjon
+    deactivate Inputs
+
+    FSM -> Inputs: Les nødstopp
+    activate Inputs
+    FSM <-- Inputs: Nødstopptilstand
+    deactivate Inputs
+
+    alt nødstopp trykket
+        FSM -> Heis: Stopp
+    else
+        FSM -> Heis: Kjør til bestillt etasje
+    end
+end
+
+@enduml

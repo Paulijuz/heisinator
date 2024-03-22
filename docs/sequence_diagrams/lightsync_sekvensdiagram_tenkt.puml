@@ -1,0 +1,50 @@
+@startuml inputs_sekvensdiagram_tenkt
+title "Sekvensdiagram for Light Sync"
+
+participant LightSync
+participant Orders
+participant Inputs
+participant FSM
+
+activate LightSync
+
+loop
+    LightSync -> Orders: Les bestillinger
+    activate Orders
+    LightSync <-- Orders: Bestillinger
+    deactivate Orders
+
+    LightSync -> Heispanel: Sett lys til etasjeknapper
+    activate Heispanel
+    deactivate Heispanel
+
+    LightSync -> Inputs: Les heisetasje
+    activate Inputs
+    LightSync <-- Inputs: Heisetasje
+    deactivate Inputs
+
+    LightSync -> Heispanel: Sett etasjeindikator
+    activate Heispanel
+    deactivate Heispanel
+
+    LightSync -> Inputs: Les nødstopp
+    activate Inputs
+    LightSync <-- Inputs: Nødstop
+    deactivate Inputs
+
+    LightSync -> Heispanel: Sett nødstopplyst
+    activate Heispanel
+    deactivate Heispanel
+
+    LightSync -> FSM: Les dør status
+    activate FSM
+    LightSync <-- FSM: Dør status
+    deactivate FSM
+
+    LightSync -> Heispanel: Sett dørindikator
+    activate Heispanel
+    deactivate Heispanel
+
+end
+
+@enduml

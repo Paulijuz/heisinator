@@ -1,5 +1,5 @@
 @startuml fsm_sekvensdiagram
-title "Sekvensdiagram for heis__kontroller__"
+title "Sekvensdiagram for FSM"
 
 activate FSM
 

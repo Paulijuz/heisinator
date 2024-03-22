@@ -1,5 +1,5 @@
 @startuml heis_tilstandsdiagram
-title "Tilstandsdiagram for heis__kontroller__"
+title "Tilstandsdiagram for FSM"
 
 state "Normal operasjon" as normal
 state "Oppstart" as oppstart
@@ -39,7 +39,7 @@ state "Stanset" as stanset
 
 oppstart -down-> normal: Treffer etasje N
 oppstart -right-> stoppet: Stoppknapp inne
-oppstart: Beveger seg\n__forsiktig__ nedover.
+oppstart: Beveger seg\nnedover.
 
 'oppstart_stoppet -left-> oppstart: Stoppknapp\nslippes
 'oppstart_stoppet: Stoppet i ukjent tilstand.
